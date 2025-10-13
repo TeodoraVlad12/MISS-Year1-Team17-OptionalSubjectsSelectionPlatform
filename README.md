@@ -26,3 +26,16 @@ The system ensures a **fair, transparent, and stable** allocation by combining *
 - Tiron Raul
 - Vlad Teodora
 
+## 🤝 Coordinator
+Arusuoaie Andrei
+
+## ✉️ Contact
+Discrod: 
+Bejan Paul Eusebiu
+Bindiu Ana-Maria
+Chiriac Laura Florina
+Tiron Raul
+Vlad Teodora (teo.v.)
+
+Arusuoaie Andrei (andrei.arusoaie@uaic.ro)
+
