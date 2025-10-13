@@ -19,3 +19,10 @@ The system ensures a **fair, transparent, and stable** allocation by combining *
   
 - **CI/CD:** GitHub Actions
 
+## 🧑‍💻 Team Members
+- Bejan Paul Eusebiu
+- Bindiu Ana-Maria
+- Chiriac Laura Florina
+- Tiron Raul
+- Vlad Teodora
+
