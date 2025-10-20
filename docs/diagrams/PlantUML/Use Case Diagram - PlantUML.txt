@@ -1,0 +1,128 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor<<Student>> LightSkyBlue
+  BackgroundColor<<Admin>> LightGoldenRodYellow
+  BackgroundColor<<System>> LightGreen
+  BorderColor Black
+  FontSize 12
+  ArrowColor DarkSlateGray
+}
+
+'=============================
+' Actors
+'=============================
+actor "?? Student" as Student
+actor "????? Administrator" as Admin
+actor "?? System" as System
+
+'=============================
+' Student Use Cases
+'=============================
+package "????? Student Use Cases" {
+  (?? Authenticate via Email) as AuthenticateViaEmail
+  (?? View Available Subjects) as ViewAvailableSubjects
+  (?? Submit Ranked Preferences) as SubmitRankedPreferences
+  (?? View Assigned Subjects) as ViewAssignedSubjects
+  (?? Request Subject Transfer) as RequestSubjectTransfer
+  (?? Receive Notifications) as ReceiveNotifications
+}
+
+'=============================
+' Admin Use Cases
+'=============================
+package "????? Admin Use Cases" {
+  (? Manage Optional Subjects) as ManageOptionalSubjects
+  (?? Define Selection Periods) as DefineSelectionPeriods
+  (?? View All Preferences) as ViewAllPreferences
+  (?? Execute Allocation Algorithm) as ExecuteAllocationAlgorithm
+  (?? Adjust Manual Assignments) as AdjustManualAssignments
+  (?? Process Mutual Transfers) as ProcessMutualTransfers
+  (?? Send Notifications) as SendNotifications
+}
+
+'=============================
+' System Use Cases
+'=============================
+package "?? System Use Cases" {
+  (?? Retrieve Student Data) as RetrieveStudentData
+  (?? Execute Gale-Shapley) as ExecuteGaleShapley
+  (? Validate Preferences) as ValidatePreferences
+  (?? Enforce Constraints) as EnforceConstraints
+}
+
+'=============================
+' Actor connections - Linii mai curate
+'=============================
+Student -down-> AuthenticateViaEmail
+Student -down-> ViewAvailableSubjects
+Student -down-> SubmitRankedPreferences
+Student -down-> ViewAssignedSubjects
+Student -down-> RequestSubjectTransfer
+Student -down-> ReceiveNotifications
+
+Admin -down-> ManageOptionalSubjects
+Admin -down-> DefineSelectionPeriods
+Admin -down-> ViewAllPreferences
+Admin -down-> ExecuteAllocationAlgorithm
+Admin -down-> AdjustManualAssignments
+Admin -down-> ProcessMutualTransfers
+Admin -down-> SendNotifications
+
+System -down-> RetrieveStudentData
+System -down-> ExecuteGaleShapley
+System -down-> ValidatePreferences
+System -down-> EnforceConstraints
+
+'=============================
+' Notes
+'=============================
+note bottom of SubmitRankedPreferences
+  Validates number of preferences
+  and their order
+end note
+
+note bottom of ExecuteAllocationAlgorithm
+  Allocation based on
+  preferences & grades
+end note
+
+note bottom of RequestSubjectTransfer
+  Mutual transfers require
+  admin approval
+end note
+
+'=============================
+' INCLUDE RELATIONSHIPS - Cu s?ge?i punctate
+'=============================
+AuthenticateViaEmail ..> RetrieveStudentData : <<include>>
+SubmitRankedPreferences ..> ValidatePreferences : <<include>>
+ExecuteAllocationAlgorithm ..> ExecuteGaleShapley : <<include>>
+ExecuteGaleShapley ..> EnforceConstraints : <<include>>
+ReceiveNotifications ..> SendNotifications : <<include>>
+
+'=============================
+' EXTEND RELATIONSHIPS - Cu s?ge?i punctate
+'=============================
+RequestSubjectTransfer <.. ProcessMutualTransfers : <<extend>>
+
+'=============================
+' Relationships Table on Right Side
+'=============================
+package "?? Relationships Table" {
+  rectangle "=== INCLUDE RELATIONSHIPS ===" {
+    ( "1. Authenticate via Email ? Retrieve Student Data" ) as Inc1
+    ( "2. Submit Preferences ? Validate Preferences" ) as Inc2
+    ( "3. Execute Allocation Algorithm ? Execute Gale-Shapley" ) as Inc3
+    ( "4. Gale-Shapley ? Enforce Constraints" ) as Inc4
+    ( "5. Receive Notifications ? Send Notifications" ) as Inc5
+  }
+  
+  rectangle "=== EXTEND RELATIONSHIPS ===" {
+    ( "Process Mutual Transfers ? Request Subject Transfer" ) as Ext1
+  }
+}
+
+@enduml
