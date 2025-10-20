@@ -6,9 +6,8 @@ sequenceDiagram
     participant DB as Database
     participant AS as Allocation System
     participant NS as Notification Service
-    participant A as Administrator
 
-    Note over S,A: Student Authentication and Profile Setup
+    Note over S,NS: Student Authentication and Profile Setup
     S->>UI: Access system
     UI->>Auth: Request authentication
     Auth->>S: Redirect to institutional login
@@ -20,13 +19,13 @@ sequenceDiagram
     Auth-->>UI: Authentication token + student data
     UI-->>S: Display dashboard with profile
 
-    Note over S,A: View Available Optional Subjects
+    Note over S,NS: View Available Optional Subjects
     S->>UI: Navigate to subjects page
     UI->>DB: Query available subjects for student's year/semester
     DB-->>UI: Return subjects list (name, description, coordinator, capacity)
     UI-->>S: Display available optional subjects
 
-    Note over S,A: Submit Preference Rankings
+    Note over S,NS: Submit Preference Rankings
     S->>UI: Select and rank preferred subjects
     UI->>UI: Validate selection (required number, no duplicates)
     S->>UI: Confirm preference submission
@@ -36,7 +35,7 @@ sequenceDiagram
     UI->>NS: Trigger confirmation email
     NS->>S: Send preference confirmation email
 
-    Note over S,A: Modify Preferences (Before Deadline)
+    Note over S,NS: Modify Preferences (Before Deadline)
     S->>UI: Request to modify preferences
     UI->>DB: Check if deadline has passed
     DB-->>UI: Deadline status
@@ -50,53 +49,40 @@ sequenceDiagram
         UI-->>S: Display error - deadline exceeded
     end
 
-    Note over S,A: Allocation Process (Administrator Triggered)
-    A->>UI: Trigger allocation algorithm
-    UI->>AS: Execute Gale-Shapley algorithm
-    AS->>DB: Retrieve student preferences and grades
-    DB-->>AS: Return preferences and academic data
-    AS->>AS: Process allocation algorithm
+    Note over S,NS: Receive Assignment Notification
+    Note right of AS: Allocation process happens<br/>in background (admin-triggered)
     AS->>DB: Store assignment results
-    DB-->>AS: Confirm assignments stored
-    AS-->>UI: Allocation complete
-    UI->>NS: Send assignment notifications
+    AS->>NS: Trigger assignment notifications
     NS->>S: Email notification of assignment
 
-    Note over S,A: View Assignment Results
+    Note over S,NS: View Assignment Results
     S->>UI: Check assignment results
     UI->>DB: Query student assignments
     DB-->>UI: Return assigned subjects
     UI-->>S: Display assigned optional subjects
 
-    Note over S,A: Request Subject Transfer
+    Note over S,NS: Request Subject Transfer
     S->>UI: Request transfer from assigned subject
     UI->>UI: Display available subjects for transfer
     S->>UI: Select desired subject for transfer
     UI->>DB: Store transfer request
     DB-->>UI: Transfer request stored
     UI-->>S: Display transfer request confirmation
-    UI->>NS: Notify administrator of transfer request
-    NS->>A: Transfer request notification
+    UI->>NS: Notify about transfer request
+    NS->>S: Transfer request confirmation email
 
-    Note over S,A: Process Transfer Request (Administrator Action)
-    A->>UI: Review transfer requests
-    UI->>DB: Query pending transfer requests
-    DB-->>UI: Return transfer requests
-    alt Mutual transfers available
-        A->>UI: Approve mutual transfers
-        UI->>DB: Execute batch transfers
-        DB-->>UI: Transfers completed
-        UI->>NS: Send transfer confirmation
-        NS->>S: Transfer approval notification
-    else Individual transfer
-        A->>UI: Approve/reject individual transfer
-        UI->>DB: Update transfer status
-        DB-->>UI: Status updated
-        UI->>NS: Send transfer decision
-        NS->>S: Transfer decision notification
-    end
+    Note over S,NS: Receive Transfer Decision
+    Note right of DB: Transfer processing happens<br/>in background (admin review)
+    DB->>NS: Transfer decision made
+    NS->>S: Transfer approval/rejection notification
 
-    Note over S,A: System Notifications
+    Note over S,NS: Check Transfer Status
+    S->>UI: View transfer status
+    UI->>DB: Query transfer request status
+    DB-->>UI: Return current status
+    UI-->>S: Display transfer status
+
+    Note over S,NS: System Notifications (Throughout Process)
     loop Notification Events
         NS->>S: Selection period opening
         NS->>S: Deadline reminders
