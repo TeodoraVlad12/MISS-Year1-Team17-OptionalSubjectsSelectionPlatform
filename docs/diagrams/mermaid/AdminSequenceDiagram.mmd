@@ -1,0 +1,145 @@
+sequenceDiagram
+    participant A as Administrator
+    participant UI as Web Interface
+    participant Auth as Authentication Service
+    participant DB as Database
+    participant AS as Allocation System
+    participant NS as Notification Service
+
+    Note over A,NS: Administrator Authentication
+    A->>UI: Access admin panel
+    UI->>Auth: Request authentication
+    Auth->>A: Redirect to institutional login
+    A->>Auth: Enter admin credentials
+    Auth-->>UI: Authentication successful
+    UI-->>A: Display admin dashboard
+
+    Note over A,NS: Manage Optional Subjects
+    A->>UI: Navigate to subjects management
+    UI->>DB: Query existing subjects
+    DB-->>UI: Return subjects list
+    UI-->>A: Display subjects management interface
+    
+    alt Create new subject
+        A->>UI: Create new subject
+        A->>UI: Enter subject details (name, description, coordinator, capacity)
+        UI->>DB: Store new subject
+        DB-->>UI: Subject created successfully
+        UI-->>A: Display success confirmation
+    else Edit existing subject
+        A->>UI: Select subject to edit
+        A->>UI: Modify subject details
+        UI->>DB: Update subject information
+        DB-->>UI: Subject updated successfully
+        UI-->>A: Display update confirmation
+    else Delete subject
+        A->>UI: Select subject to delete
+        UI->>DB: Check if subject has student assignments
+        DB-->>UI: Return assignment status
+        alt No assignments
+            UI->>DB: Delete subject
+            DB-->>UI: Subject deleted successfully
+            UI-->>A: Display deletion confirmation
+        else Has assignments
+            UI-->>A: Display error - cannot delete assigned subject
+        end
+    end
+
+    Note over A,NS: Define Selection Periods
+    A->>UI: Navigate to period management
+    A->>UI: Set selection start date
+    A->>UI: Set selection end date
+    A->>UI: Configure notification schedule
+    UI->>DB: Store period configuration
+    DB-->>UI: Period settings saved
+    UI-->>A: Display period confirmation
+    UI->>NS: Schedule period notifications
+    NS-->>UI: Notifications scheduled
+
+    Note over A,NS: View Student Preferences
+    A->>UI: Navigate to preferences overview
+    UI->>DB: Query all student preferences
+    DB-->>UI: Return preferences data
+    UI-->>A: Display preferences dashboard
+    
+    A->>UI: Apply filters (by student, subject, rank)
+    UI->>DB: Query filtered preferences
+    DB-->>UI: Return filtered results
+    UI-->>A: Display filtered preferences
+
+    Note over A,NS: Execute Allocation Algorithm
+    A->>UI: Navigate to allocation management
+    UI->>DB: Query submission statistics
+    DB-->>UI: Return stats (total students, completion rate)
+    UI-->>A: Display allocation readiness status
+    
+    A->>UI: Review allocation parameters
+    A->>UI: Trigger allocation algorithm
+    UI->>AS: Execute Gale-Shapley algorithm
+    AS->>DB: Retrieve student preferences and grades
+    DB-->>AS: Return student data
+    AS->>AS: Process allocation algorithm
+    AS->>DB: Store assignment results
+    DB-->>AS: Assignments stored successfully
+    AS-->>UI: Allocation completed with statistics
+    UI-->>A: Display allocation results and statistics
+    
+    A->>UI: Review and approve assignments
+    UI->>NS: Send assignment notifications to all students
+    NS-->>UI: Notifications sent
+    UI-->>A: Display notification confirmation
+
+    Note over A,NS: Manual Assignment Adjustments
+    A->>UI: Navigate to assignment management
+    UI->>DB: Query current assignments
+    DB-->>UI: Return assignment data
+    UI-->>A: Display assignment overview
+    
+    A->>UI: Select student for manual adjustment
+    A->>UI: Change student's assigned subject
+    UI->>DB: Update assignment
+    DB-->>UI: Assignment updated
+    UI-->>A: Display update confirmation
+    UI->>NS: Send assignment change notification
+    NS-->>A: Notification sent to affected student
+
+    Note over A,NS: Process Transfer Requests
+    A->>UI: Navigate to transfer management
+    UI->>DB: Query pending transfer requests
+    DB-->>UI: Return transfer requests
+    UI-->>A: Display transfer requests dashboard
+    
+    alt Review mutual transfers
+        A->>UI: Identify mutual transfer opportunities
+        UI->>DB: Query matching transfer pairs
+        DB-->>UI: Return mutual transfer candidates
+        UI-->>A: Display mutual transfer options
+        A->>UI: Approve batch mutual transfers
+        UI->>DB: Execute batch transfers atomically
+        DB-->>UI: Transfers completed successfully
+        UI-->>A: Display batch transfer confirmation
+        UI->>NS: Send transfer confirmations to affected students
+        NS-->>UI: Notifications sent
+    else Review individual transfers
+        A->>UI: Select individual transfer request
+        A->>UI: Approve or reject transfer
+        UI->>DB: Update transfer status
+        DB-->>UI: Transfer status updated
+        UI-->>A: Display decision confirmation
+        UI->>NS: Send transfer decision to student
+        NS-->>UI: Notification sent
+    end
+
+    Note over A,NS: Monitor System Activity
+    A->>UI: View system dashboard
+    UI->>DB: Query system metrics
+    DB-->>UI: Return activity statistics
+    UI-->>A: Display system overview (active students, pending requests, etc.)
+
+    Note over A,NS: Send Manual Notifications
+    A->>UI: Navigate to notification center
+    A->>UI: Compose custom notification
+    A->>UI: Select recipient groups (all students, specific year, etc.)
+    UI->>NS: Send custom notifications
+    NS-->>UI: Notifications delivered
+    UI-->>A: Display delivery confirmation
