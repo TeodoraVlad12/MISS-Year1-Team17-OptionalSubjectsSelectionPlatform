@@ -1,0 +1,82 @@
+---
+config:
+  theme: default
+  themeVariables:
+    primaryColor: '#f1f8ff'
+    tertiaryColor: '#ffffff'
+    fontSize: 14px
+    fontFamily: ''
+    primaryBorderColor: '#1565c0'
+    lineColor: '#607d8b'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: basis
+---
+flowchart LR
+ subgraph CL["🎓 Client Layer"]
+        student["🧑‍🎓 Student Web Browser"]
+        admin["🧑‍💼 Admin Web Browser"]
+  end
+ subgraph AUTH["🔐 University Authentication Layer"]
+        authsvc["🔑 Auth Service<br>(OIDC / SAML)"]
+        univapi["🏛️ Institutional API<br>(Student Data)"]
+  end
+ subgraph WEB["💻 Web Frontend Layer"]
+        frontend["🌐 Student/Admin Web App"]
+  end
+ subgraph API["🧩 Backend API Layer"]
+        api["⚙️ Main API Gateway"]
+        alloc["📊 Allocation Service<br>(Gale–Shapley)"]
+        transfer["🔁 Transfer Manager"]
+        notify["📧 Notification Service"]
+  end
+ subgraph DATA["🗄️ Data Layer"]
+        usersdb["👥 Users DB"]
+        prefsdb["🗂 Preferences DB"]
+        subjectsdb["📘 Subjects DB"]
+        transfersdb["🔄 Transfers DB"]
+        gradesdb["🏅 Grades DB"]
+  end
+ subgraph INFRA["☁️ Infrastructure Layer"]
+        queue["📬 Message Queue"]
+        smtp["📨 SMTP Server"]
+        storage["💾 File Storage / Backups"]
+  end
+    student -- 🌐 HTTPS Request --> frontend
+    admin -- 🌐 HTTPS Request --> frontend
+    frontend -- 📡 REST / GraphQL API Calls --> api
+    api -- 🔒 Auth via OIDC / SAML --> authsvc
+    authsvc -- 📖 Fetch Student Data --> univapi
+    api -- ⚙️ Trigger Allocation --> alloc
+    api -- 🔁 Manage Transfers --> transfer
+    api -- 📧 Send Notifications --> notify
+    alloc -- 📥 Read Preferences --> prefsdb
+    alloc -- 📚 Read Subjects --> subjectsdb
+    alloc -- 🎓 Access Grades --> gradesdb
+    alloc -- 👤 Access Users --> usersdb
+    transfer -- 🔄 Handle Requests --> transfersdb
+    transfer -- 📚 Access Subjects --> subjectsdb
+    notify -- 📨 Push Message --> queue
+    queue -- ✉️ Deliver Email --> smtp
+    api -- 🧾 CRUD Operations --> usersdb & prefsdb & subjectsdb & transfersdb & gradesdb
+    DATA -- 💾 Daily Backups --> storage
+    api -- 🏛️ Fetch Student Info --> univapi
+    X4[" "]
+    X3[" "]
+    X2[" "]
+    X1[" "]
+     DATA:::layer
+     X4:::invis
+     X4:::invis
+     INFRA:::layer
+     X3:::invis
+     X3:::invis
+     X2:::invis
+     X2:::invis
+     X1:::invis
+     X1:::invis
+     API:::layer
+     WEB:::layer
+     CL:::layer
+    classDef layer fill:#fafafa,stroke:#1565c0,stroke-width:2px,corner-radius:10px
+    classDef invis stroke:none,fill:none
