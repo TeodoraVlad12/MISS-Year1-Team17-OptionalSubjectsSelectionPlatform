@@ -1,0 +1,105 @@
+sequenceDiagram
+    participant S as Student
+    participant UI as Web Interface
+    participant Auth as Authentication Service
+    participant API as University API
+    participant DB as Database
+    participant AS as Allocation System
+    participant NS as Notification Service
+    participant A as Administrator
+
+    Note over S,A: Student Authentication and Profile Setup
+    S->>UI: Access system
+    UI->>Auth: Request authentication
+    Auth->>S: Redirect to institutional login
+    S->>Auth: Enter institutional email credentials
+    Auth->>API: Validate credentials
+    API-->>Auth: Authentication successful
+    Auth->>API: Request student data (matriculation number)
+    API-->>Auth: Return student profile data
+    Auth-->>UI: Authentication token + student data
+    UI-->>S: Display dashboard with profile
+
+    Note over S,A: View Available Optional Subjects
+    S->>UI: Navigate to subjects page
+    UI->>DB: Query available subjects for student's year/semester
+    DB-->>UI: Return subjects list (name, description, coordinator, capacity)
+    UI-->>S: Display available optional subjects
+
+    Note over S,A: Submit Preference Rankings
+    S->>UI: Select and rank preferred subjects
+    UI->>UI: Validate selection (required number, no duplicates)
+    S->>UI: Confirm preference submission
+    UI->>DB: Store student preferences with rankings
+    DB-->>UI: Confirmation of storage
+    UI-->>S: Display success message
+    UI->>NS: Trigger confirmation email
+    NS->>S: Send preference confirmation email
+
+    Note over S,A: Modify Preferences (Before Deadline)
+    S->>UI: Request to modify preferences
+    UI->>DB: Check if deadline has passed
+    DB-->>UI: Deadline status
+    alt Deadline not passed
+        UI-->>S: Allow preference modification
+        S->>UI: Update preference rankings
+        UI->>DB: Update stored preferences
+        DB-->>UI: Update confirmation
+        UI-->>S: Display updated preferences
+    else Deadline passed
+        UI-->>S: Display error - deadline exceeded
+    end
+
+    Note over S,A: Allocation Process (Administrator Triggered)
+    A->>UI: Trigger allocation algorithm
+    UI->>AS: Execute Gale-Shapley algorithm
+    AS->>DB: Retrieve student preferences and grades
+    DB-->>AS: Return preferences and academic data
+    AS->>AS: Process allocation algorithm
+    AS->>DB: Store assignment results
+    DB-->>AS: Confirm assignments stored
+    AS-->>UI: Allocation complete
+    UI->>NS: Send assignment notifications
+    NS->>S: Email notification of assignment
+
+    Note over S,A: View Assignment Results
+    S->>UI: Check assignment results
+    UI->>DB: Query student assignments
+    DB-->>UI: Return assigned subjects
+    UI-->>S: Display assigned optional subjects
+
+    Note over S,A: Request Subject Transfer
+    S->>UI: Request transfer from assigned subject
+    UI->>UI: Display available subjects for transfer
+    S->>UI: Select desired subject for transfer
+    UI->>DB: Store transfer request
+    DB-->>UI: Transfer request stored
+    UI-->>S: Display transfer request confirmation
+    UI->>NS: Notify administrator of transfer request
+    NS->>A: Transfer request notification
+
+    Note over S,A: Process Transfer Request (Administrator Action)
+    A->>UI: Review transfer requests
+    UI->>DB: Query pending transfer requests
+    DB-->>UI: Return transfer requests
+    alt Mutual transfers available
+        A->>UI: Approve mutual transfers
+        UI->>DB: Execute batch transfers
+        DB-->>UI: Transfers completed
+        UI->>NS: Send transfer confirmation
+        NS->>S: Transfer approval notification
+    else Individual transfer
+        A->>UI: Approve/reject individual transfer
+        UI->>DB: Update transfer status
+        DB-->>UI: Status updated
+        UI->>NS: Send transfer decision
+        NS->>S: Transfer decision notification
+    end
+
+    Note over S,A: System Notifications
+    loop Notification Events
+        NS->>S: Selection period opening
+        NS->>S: Deadline reminders
+        NS->>S: Assignment results
+        NS->>S: Transfer status updates
+    end
