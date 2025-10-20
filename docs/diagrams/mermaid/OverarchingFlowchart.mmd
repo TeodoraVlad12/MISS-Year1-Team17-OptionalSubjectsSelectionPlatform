@@ -1,0 +1,21 @@
+flowchart TD
+    A[Optional Subjects Selection System] --> B{User Authentication}
+    B -->|Success| C{User Role}
+    B -->|Failure| D[Display Error Message]
+    D --> A
+    
+    C -->|Student| E[Student Workflow]
+    C -->|Administrator| F[Administrator Workflow]
+    
+    E --> G[See Student-Flowchart.mmd for detailed student processes:<br/>- View Available Subjects<br/>- Submit Preferences<br/>- View Assignments<br/>- Request Transfers]
+    
+    F --> H[See Administrator-Flowchart.mmd for detailed admin processes:<br/>- Manage Subjects<br/>- View Student Preferences<br/>- Execute Allocation Algorithm<br/>- Process Transfer Requests]
+    
+    G --> I[Student Actions Complete]
+    H --> J[Administrator Actions Complete]
+    
+    I --> K[System Notifications]
+    J --> K
+    
+    K --> L[Email Delivery to Users]
+    L --> M[Process Complete]

@@ -1,0 +1,79 @@
+flowchart TD
+    A[Administrator Access System] --> B{Authentication}
+    B -->|Success| C[Administrator Dashboard]
+    B -->|Failure| D[Display Error Message]
+    D --> A
+    
+    C --> E[Administrator Menu]
+    E --> F{Select Action}
+    
+    F -->|Manage Subjects| G[Subject Management]
+    F -->|View Preferences| H[View All Student Preferences]
+    F -->|Execute Allocation| I[Allocation Process]
+    F -->|Process Transfers| J[Transfer Management]
+    
+    G --> G1[Create/Edit/Delete Subjects]
+    G1 --> G2[Set Subject Capacity]
+    G2 --> G3[Define Target Year/Semester]
+    G3 --> E
+    
+    H --> H1[Filter by Student/Subject/Rank]
+    H1 --> H2[Export Preference Data]
+    H2 --> E
+    
+    I --> I1{Preference Period Ended?}
+    I1 -->|No| I2[Display Error - Period Still Active]
+    I2 --> E
+    I1 -->|Yes| I3[Review Allocation Parameters]
+    I3 --> I4[Execute Gale-Shapley Algorithm]
+    I4 --> I5[Generate Assignment Results]
+    I5 --> I6{Results Valid?}
+    I6 -->|No| I7[Display Algorithm Errors]
+    I7 --> I3
+    I6 -->|Yes| I8[Review Assignment Statistics]
+    I8 --> I9{Approve Results?}
+    I9 -->|No| I10[Manual Assignment Adjustments]
+    I10 --> I8
+    I9 -->|Yes| I11[Finalize Assignments]
+    I11 --> I12[Send Notification Emails to Students]
+    I12 --> E
+    
+    J --> J1[View Pending Transfer Requests]
+    J1 --> J2{Mutual Transfers Available?}
+    J2 -->|Yes| J3[Identify Mutual Transfer Groups]
+    J2 -->|No| J4[Process Individual Requests]
+    
+    J3 --> J5[Select Transfers to Approve]
+    J5 --> J6{Capacity Constraints Met?}
+    J6 -->|No| J7[Display Constraint Violation]
+    J7 --> J5
+    J6 -->|Yes| J8[Execute Batch Transfer]
+    J8 --> J9[Send Transfer Confirmation Emails]
+    J9 --> E
+    
+    J4 --> J10[Review Individual Request]
+    J10 --> J11{Approve Request?}
+    J11 -->|Yes| J12[Execute Individual Transfer]
+    J11 -->|No| J13[Reject Transfer Request]
+    J12 --> J14[Send Approval Email]
+    J13 --> J15[Send Rejection Email]
+    J14 --> J1
+    J15 --> J1
+    
+    I12 --> K[System Notification Management]
+    J9 --> K
+    J14 --> K
+    J15 --> K
+    K --> L{Notification Type}
+    L -->|Period Opening| M[Send Period Start Notifications]
+    L -->|Deadline Reminder| N[Send Deadline Reminders]
+    L -->|Assignment Complete| O[Send Assignment Notifications]
+    L -->|Transfer Status| P[Send Transfer Status Updates]
+    
+    M --> Q[Email Delivery System]
+    N --> Q
+    O --> Q
+    P --> Q
+    Q --> R[Log Notification Status]
+    R --> S[Generate Delivery Reports]
+    S --> E

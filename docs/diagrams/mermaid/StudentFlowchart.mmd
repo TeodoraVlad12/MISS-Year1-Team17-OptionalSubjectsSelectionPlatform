@@ -1,0 +1,52 @@
+flowchart TD
+    A[Student Access System] --> B{Authentication}
+    B -->|Success| C[Student Dashboard]
+    B -->|Failure| D[Display Error Message]
+    D --> A
+    
+    C --> E{Preference Period Active?}
+    E -->|Yes| F[View Available Subjects]
+    E -->|No| G[View Current Assignments]
+    
+    F --> H[Select and Rank Preferences]
+    H --> I{Valid Selection?}
+    I -->|No| J[Display Validation Error]
+    J --> H
+    I -->|Yes| K[Save Preferences]
+    K --> L[Display Confirmation]
+    L --> M[Student Can View/Edit Until Deadline]
+    
+    M --> N{Deadline Reached?}
+    N -->|No| O[Allow Preference Modification]
+    O --> F
+    N -->|Yes| P[Lock Preferences]
+    P --> Q[Wait for Allocation Results]
+    Q --> R[Receive Assignment Notification]
+    R --> G
+    
+    G --> S{Transfer Period Active?}
+    S -->|Yes| T[Request Subject Transfer]
+    S -->|No| U[View Assignment Details]
+    
+    T --> V[Submit Transfer Request]
+    V --> W[Display Transfer Confirmation]
+    W --> X[Wait for Transfer Decision]
+    X --> Y[Receive Transfer Status Notification]
+    Y --> G
+    
+    U --> Z[Display Subject Information]
+    Z --> AA[Display Coordinator Contact]
+    AA --> AB[Show Assignment Status]
+    
+    R --> AC[System Sends Automated Notifications]
+    Y --> AC
+    AC --> AD{Notification Type}
+    AD -->|Period Opening| AE[Receive Period Start Notification]
+    AD -->|Deadline Reminder| AF[Receive Deadline Reminder]
+    AD -->|Assignment Complete| AG[Receive Assignment Notification]
+    AD -->|Transfer Status| AH[Receive Transfer Status Update]
+    
+    AE --> AI[Email Delivered to Student]
+    AF --> AI
+    AG --> AI
+    AH --> AI
