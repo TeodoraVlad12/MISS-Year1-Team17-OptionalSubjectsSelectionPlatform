@@ -1,4 +1,4 @@
-# TeodoraVlad12-MISS-Year1-Team17-OptionalSubjectsSelectionPlatform
+# MISS-Year1-Team17-OptionalSubjectsSelectionPlatform
 
 # 🎓 ElectiveMatch
 
