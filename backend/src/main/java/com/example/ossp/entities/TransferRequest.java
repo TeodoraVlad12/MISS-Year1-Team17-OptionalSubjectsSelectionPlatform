@@ -21,15 +21,15 @@ public class TransferRequest {
     @Column(name = "transfer_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_course_id", nullable = false)
     private OptionalCourse currentCourse;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requested_course_id", nullable = false)
     private OptionalCourse requestedCourse;
 

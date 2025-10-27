@@ -22,11 +22,11 @@ public class Preference {
     @Column(nullable = false)
     private int priority; // 1 = highest priority, 2, 3, ...
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private OptionalCourse optionalCourse;
 }
