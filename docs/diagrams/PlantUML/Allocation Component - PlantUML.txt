@@ -1,0 +1,100 @@
+@startuml
+class Student {
+  - matriculationNumber: String
+  - name: String
+  - email: String
+  - averageGrade: Double
+}
+
+class OptionalSubject {
+  - subjectId: String
+  - name: String
+  - capacity: Integer
+}
+
+class Preference {
+  - rank: Integer
+  - submissionDate: Date
+}
+
+class Assignment {
+  - assignmentDate: Date
+  - type: AssignmentType
+}
+
+enum AssignmentType {
+  ALGORITHM
+  MANUAL
+  TRANSFER
+}
+
+class AllocationContext {
+  - students: List<Student>
+  - subjects: List<OptionalSubject>
+  - preferences: List<Preference>
+}
+
+class AllocationResult {
+  - assignments: Map<Student, OptionalSubject>
+  - success: boolean
+}
+
+interface AllocationStrategy {
+  + executeAllocation(AllocationContext): AllocationResult
+  + getStrategyName(): String
+}
+
+class GaleShapleyStrategy {
+  + performAllocation(AllocationContext): AllocationResult
+}
+
+class GradeBasedStrategy {
+  + performAllocation(AllocationContext): AllocationResult
+}
+
+class RandomStrategy {
+  + performAllocation(AllocationContext): AllocationResult
+}
+
+class AllocationStrategyFactory {
+  + getStrategy(String): AllocationStrategy
+}
+
+class AllocationStrategyDecorator {
+  - decoratedStrategy: AllocationStrategy
+}
+
+class LoggingAllocationDecorator {
+  + executeAllocation(AllocationContext): AllocationResult
+}
+
+class ValidationAllocationDecorator {
+  + executeAllocation(AllocationContext): AllocationResult
+}
+
+class AllocationService {
+  + executeAllocation(AllocationContext, String): AllocationResult
+}
+
+' Relationships
+Student "1" -- "*" Preference
+OptionalSubject "1" -- "*" Preference
+Student "1" -- "*" Assignment
+OptionalSubject "1" -- "*" Assignment
+Assignment --> AssignmentType
+
+AllocationStrategy <|.. GaleShapleyStrategy
+AllocationStrategy <|.. GradeBasedStrategy
+AllocationStrategy <|.. RandomStrategy
+
+AllocationStrategy <|.. AllocationStrategyDecorator
+AllocationStrategyDecorator <|-- LoggingAllocationDecorator
+AllocationStrategyDecorator <|-- ValidationAllocationDecorator
+
+AllocationStrategyFactory --> AllocationStrategy
+AllocationService --> AllocationStrategyFactory
+
+AllocationContext --> Student
+AllocationContext --> OptionalSubject
+AllocationContext --> Preference
+@enduml
