@@ -1,9 +1,9 @@
 package com.example.ossp;
 
-import com.example.ossp.dto.AllocationParameters;
-import com.example.ossp.entity.OptionalCourse;
-import com.example.ossp.entity.Preference;
-import com.example.ossp.entity.Student;
+import com.example.ossp.dtos.AllocationParameters;
+import com.example.ossp.entities.OptionalCourse;
+import com.example.ossp.entities.Preference;
+import com.example.ossp.entities.Student;
 import lombok.Builder;
 import lombok.Getter;
 
