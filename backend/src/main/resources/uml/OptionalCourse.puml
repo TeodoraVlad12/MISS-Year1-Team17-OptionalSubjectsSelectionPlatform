@@ -1,0 +1,60 @@
+@startuml
+' ---------------------------
+' OptionalCourse Component UML
+' ---------------------------
+
+' Classes
+class OptionalCourse {
+    +Long id
+    +String name
+    +String code
+    +int maxStudents
+    +CoursePackage coursePackage
+    +List<Preference> preferences
+    +List<Enrollment> enrollments
+}
+
+class CoursePackage {
+    +Long id
+    +String name
+    +int year
+    +int semester
+    +String level
+    +List<OptionalCourse> courses
+}
+
+class Preference {
+    +Long id
+    +Student student
+    +OptionalCourse optionalCourse
+    +int priority
+}
+
+class Enrollment {
+    +Long id
+    +Student student
+    +OptionalCourse optionalCourse
+    +LocalDate enrollmentDate
+}
+
+class Student {
+    +Long id
+    +String firstName
+    +String lastName
+    +String email
+}
+
+' ---------------------------
+' Relationships
+' ---------------------------
+
+OptionalCourse "*" --> "1" CoursePackage : coursePackage
+CoursePackage "1" --> "*" OptionalCourse : courses
+
+OptionalCourse "1" --> "*" Preference : preferences
+Preference "*" --> "1" Student : student
+
+OptionalCourse "1" --> "*" Enrollment : enrollments
+Enrollment "*" --> "1" Student : student
+
+@enduml
