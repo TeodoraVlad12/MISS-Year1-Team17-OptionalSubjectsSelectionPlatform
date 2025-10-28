@@ -37,7 +37,7 @@ public class CoursePackage {
     @Column(nullable = false)
     private String level; // Bachelor, Master, etc.
 
-    @OneToMany(mappedBy = "coursePackage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "coursePackage", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OptionalCourse> optionalCourses = new ArrayList<>();
 
 }

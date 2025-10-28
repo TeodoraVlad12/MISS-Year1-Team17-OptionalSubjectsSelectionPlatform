@@ -1,0 +1,44 @@
+@startuml
+' ---------------------------
+' Transfer Requests Component
+' ---------------------------
+
+' Classes
+class Student {
+    +Long id
+    +String firstName
+    +String lastName
+    +String email
+}
+
+class OptionalCourse {
+    +Long id
+    +String name
+    +String code
+    +int maxStudents
+}
+
+class TransferRequest {
+    +Long id
+    +LocalDate requestDate
+    +TransferStatus status
+    +Student student
+    +OptionalCourse currentCourse
+    +OptionalCourse requestedCourse
+}
+
+enum TransferStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+' ---------------------------
+' Relationships
+' ---------------------------
+
+TransferRequest "*" --> "1" Student : student
+TransferRequest "*" --> "1" OptionalCourse : currentCourse
+TransferRequest "*" --> "1" OptionalCourse : requestedCourse
+
+@enduml

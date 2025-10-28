@@ -2,6 +2,7 @@ package com.example.ossp.strategies.allocations;
 
 import com.example.ossp.AllocationContext;
 import com.example.ossp.dtos.AllocationResult;
+import com.example.ossp.entities.OptionalCourse;
 import com.example.ossp.entities.Student;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class GaleShapleyStrategy extends AbstractAllocationStrategy {
         System.out.println("Executing Gale-Shapley algorithm...");
 
         // Simplified Gale-Shapley implementation
-        Map<Student, OptionalSubject> assignments = new HashMap<>();
+        Map<Student, OptionalCourse> assignments = new HashMap<>();
 
         // TODO: Implement actual Gale-Shapley algorithm
         // This is just a placeholder
