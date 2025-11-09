@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import ro.uaic.ossp.models.enums.UserRole;
 import ro.uaic.ossp.security.SecurityContext;
+import ro.uaic.ossp.security.UserContext;
 import ro.uaic.ossp.security.annotations.RequireRole;
 import ro.uaic.ossp.security.exceptions.AccessDeniedException;
 
@@ -29,7 +30,7 @@ public class SecurityAspect {
         Method method = ((org.aspectj.lang.reflect.MethodSignature) joinPoint.getSignature()).getMethod();
         RequireRole requireRole = method.getAnnotation(RequireRole.class);
         
-        SecurityContext.UserContext currentUser = securityContext.getCurrentUser();
+        UserContext currentUser = securityContext.getCurrentUser();
         
         log.info("Security check for {}.{} - User: {} ({})", 
                 className, methodName, currentUser.getUserId(), currentUser.getRole());

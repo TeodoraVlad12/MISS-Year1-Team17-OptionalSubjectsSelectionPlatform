@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import ro.uaic.ossp.controllers.AllocationController;
 import ro.uaic.ossp.models.enums.UserRole;
+import ro.uaic.ossp.security.UserContext;
 import ro.uaic.ossp.security.exceptions.AccessDeniedException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,7 +80,7 @@ class SecurityAspectTest {
         assertFalse(securityContext.hasRole(UserRole.STUDENT));
         assertTrue(securityContext.hasAnyRole(UserRole.ADMIN, UserRole.SECRETARY));
         
-        SecurityContext.UserContext user = securityContext.getCurrentUser();
+        UserContext user = securityContext.getCurrentUser();
         assertEquals("test-user", user.getUserId());
         assertEquals(UserRole.ADMIN, user.getRole());
     }
@@ -88,7 +89,7 @@ class SecurityAspectTest {
     void testSecurityContext_DefaultUser() {
         securityContext.clearContext();
         
-        SecurityContext.UserContext user = securityContext.getCurrentUser();
+        UserContext user = securityContext.getCurrentUser();
         assertEquals("demo-admin", user.getUserId());
         assertEquals(UserRole.ADMIN, user.getRole());
     }
