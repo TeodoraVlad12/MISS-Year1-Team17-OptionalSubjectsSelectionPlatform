@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import ro.uaic.ossp.dtos.AllocationRequestDTO;
 import ro.uaic.ossp.dtos.StudentAllocationDTO;
+import ro.uaic.ossp.models.enums.UserRole;
+import ro.uaic.ossp.security.annotations.RequireRole;
 import ro.uaic.ossp.services.AllocationService;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class AllocationController {
 
     // Maybe change the path of this endpoint
     @PostMapping("/run")
+    @RequireRole({UserRole.ADMIN, UserRole.SECRETARY})
     public ResponseEntity<List<StudentAllocationDTO>> runAllocation(@Valid @RequestBody AllocationRequestDTO request) {
         try {
             List<StudentAllocationDTO> allocations = allocationService.executeAllocation(
