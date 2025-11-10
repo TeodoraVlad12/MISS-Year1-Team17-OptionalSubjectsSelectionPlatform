@@ -2,6 +2,8 @@ package ro.uaic.ossp.services.strategies;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ro.uaic.ossp.dtos.PreferenceDTO;
 import ro.uaic.ossp.dtos.StudentAllocationDTO;
 import ro.uaic.ossp.services.strategies.implementations.GradeBasedStrategy;
@@ -10,14 +12,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class GradeBasedStrategyTest {
 
+    @Autowired
     private GradeBasedStrategy strategy;
-
-    @BeforeEach
-    void setUp() {
-        strategy = new GradeBasedStrategy();
-    }
 
     @Test
     void shouldAllocateStudentToFirstPreference_WhenNoCompetition() {
