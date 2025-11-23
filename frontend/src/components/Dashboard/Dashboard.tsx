@@ -1,17 +1,15 @@
 import React from 'react';
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Box,
   Card,
   CardContent,
   Button,
-  Chip,
-  Avatar
+  Chip
 } from '@mui/material';
-import { Logout, School, AdminPanelSettings } from '@mui/icons-material';
+import { School, AdminPanelSettings } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import TopBar from '../TopBar/TopBar';
 
 const Dashboard: React.FC = () => {
   const { user: userInfo, logout } = useAuth();
@@ -34,33 +32,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            ElectiveMatch - Optional Subjects Selection
-          </Typography>
-          
-          <Box display="flex" alignItems="center" gap={2}>
-            <Chip 
-              icon={getRoleIcon()} 
-              label={userInfo.role}
-              color={getRoleColor() as any}
-              variant="outlined"
-              sx={{ color: 'white', borderColor: 'white' }}
-            />
-            <Typography variant="body2">
-              {userInfo.firstName} {userInfo.lastName}
-            </Typography>
-            <Button 
-              color="inherit" 
-              onClick={handleLogout}
-              startIcon={<Logout />}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <TopBar 
+        title="ElectiveMatch - Optional Subjects Selection"
+        showRoleChip={true}
+      />
 
       <Box p={3}>
         <Typography variant="h4" gutterBottom>

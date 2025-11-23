@@ -123,21 +123,6 @@ const Login: React.FC = () => {
                 )}
               </Button>
             </form>
-
-            {/*<Box mt={2}>*/}
-            {/*  <Typography variant="body2" color="textSecondary" align="center">*/}
-            {/*    Demo Accounts:*/}
-            {/*  </Typography>*/}
-            {/*  <Typography variant="caption" display="block" align="center">*/}
-            {/*    Student: john.doe.123@student.uaic.ro*/}
-            {/*  </Typography>*/}
-            {/*  <Typography variant="caption" display="block" align="center">*/}
-            {/*    Admin: admin.secretary@uaic.ro*/}
-            {/*  </Typography>*/}
-            {/*  <Typography variant="caption" display="block" align="center">*/}
-            {/*    Password: any value*/}
-            {/*  </Typography>*/}
-            {/*</Box>*/}
           </CardContent>
         </Card>
       </Box>

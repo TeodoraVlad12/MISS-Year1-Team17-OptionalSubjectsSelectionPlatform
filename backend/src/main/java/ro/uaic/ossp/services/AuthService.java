@@ -63,7 +63,7 @@ public class AuthService {
         if (user == null) {
             // Create appropriate user type based on role
             if (apiResponse.getRole() == UserRole.STUDENT) {
-                user = Student.studentBuilder()
+                user = Student.builder()
                         .email(apiResponse.getEmail())
                         .firstName(apiResponse.getFirstName())
                         .lastName(apiResponse.getLastName())

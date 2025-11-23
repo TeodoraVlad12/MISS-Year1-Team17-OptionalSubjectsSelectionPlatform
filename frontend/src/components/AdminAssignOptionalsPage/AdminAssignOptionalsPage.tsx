@@ -16,18 +16,17 @@ import {
     TableRow,
     Alert,
     Chip,
-    AppBar,
-    Toolbar,
 } from '@mui/material';
-import { Home as HomeIcon, Logout, AdminPanelSettings } from '@mui/icons-material';
+import { AdminPanelSettings } from '@mui/icons-material';
 import type { StudentAllocation } from '../../models/StudentAllocation';
 import { useServices } from '../../services/ServicesContext';
 import { useAuth } from '../../contexts/AuthContext';
+import TopBar from '../TopBar/TopBar';
 import './AdminAssignOptionalsPage.styles.scss';
 
 export const AdminAssignOptionalsPage = () => {
     const { allocationService } = useServices();
-    const { user: userInfo, logout } = useAuth();
+    const { user: userInfo } = useAuth();
     const [years, setYears] = useState<number[]>([]);
     const [specializations, setSpecializations] = useState<string[]>([]);
     const [selectedYear, setSelectedYear] = useState<number | ''>('');
@@ -86,10 +85,6 @@ export const AdminAssignOptionalsPage = () => {
         }
     };
 
-    const handleLogout = () => {
-        logout();
-    };
-
     const handleGoHome = () => {
         window.location.href = '/dashboard';
     };
@@ -100,33 +95,11 @@ export const AdminAssignOptionalsPage = () => {
 
     return (
         <Box>
-            <AppBar position="static">
-                <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        ElectiveMatch - Optional Subjects Allocation
-                    </Typography>
-                    
-                    <Box display="flex" alignItems="center" gap={2}>
-                        <Typography variant="body2">
-                            {userInfo.firstName} {userInfo.lastName}
-                        </Typography>
-                        <Button 
-                            color="inherit" 
-                            onClick={handleGoHome}
-                            startIcon={<HomeIcon />}
-                        >
-                            Home
-                        </Button>
-                        <Button 
-                            color="inherit" 
-                            onClick={handleLogout}
-                            startIcon={<Logout />}
-                        >
-                            Logout
-                        </Button>
-                    </Box>
-                </Toolbar>
-            </AppBar>
+            <TopBar 
+                title="ElectiveMatch - Optional Subjects Allocation"
+                showHomeButton={true}
+                onHomeClick={handleGoHome}
+            />
 
             <Box p={3}>
                 <Typography variant="h4" gutterBottom>

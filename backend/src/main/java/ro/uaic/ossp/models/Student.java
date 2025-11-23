@@ -2,14 +2,15 @@ package ro.uaic.ossp.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ro.uaic.ossp.models.enums.UserRole;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -27,15 +28,4 @@ public class Student extends User {
 
     @Column(name = "group_number")
     private String groupNumber;
-
-    @Builder(builderMethodName = "studentBuilder")
-    public Student(Long id, String email, String firstName, String lastName, UserRole role, 
-                   String department, String position, String matriculationNumber, 
-                   Integer academicYear, String specialization, String groupNumber) {
-        super(id, email, firstName, lastName, role, department, position);
-        this.matriculationNumber = matriculationNumber;
-        this.academicYear = academicYear;
-        this.specialization = specialization;
-        this.groupNumber = groupNumber;
-    }
 }
