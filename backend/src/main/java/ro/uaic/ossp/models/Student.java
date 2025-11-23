@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ro.uaic.ossp.models.enums.UserRole;
+import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -28,4 +30,13 @@ public class Student extends User {
 
     @Column(name = "group_number")
     private String groupNumber;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Preference> preferences = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Enrollment> enrollments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TransferRequest> transferRequests = new ArrayList<>();
 }

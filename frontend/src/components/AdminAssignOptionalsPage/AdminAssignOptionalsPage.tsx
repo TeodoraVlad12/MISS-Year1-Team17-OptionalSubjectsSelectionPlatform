@@ -26,7 +26,6 @@ import './AdminAssignOptionalsPage.styles.scss';
 
 export const AdminAssignOptionalsPage = () => {
     const { allocationService } = useServices();
-    const { user: userInfo } = useAuth();
     const [years, setYears] = useState<number[]>([]);
     const [specializations, setSpecializations] = useState<string[]>([]);
     const [selectedYear, setSelectedYear] = useState<number | ''>('');
@@ -84,8 +83,6 @@ export const AdminAssignOptionalsPage = () => {
             setLoading(false);
         }
     };
-
-
 
     return (
         <Box>
