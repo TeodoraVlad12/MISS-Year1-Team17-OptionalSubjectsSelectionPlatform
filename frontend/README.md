@@ -1,35 +1,91 @@
-# React + TypeScript + Vite
+# Optional Subjects Selection Platform - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+##  First-Time Setup
 
-## Running the Project
+### 1. Install Dependencies
 
-To run first time:
 ```bash
-npm install && npm run dev
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
 ```
 
-To run:
+##  Running the Frontend (Every Time)
+
+### 1. Start the Development Server
+
 ```bash
+# Navigate to frontend directory
+cd frontend
+
+# Start the development server
 npm run dev
 ```
 
-## Project Structure
+The frontend will start on: `http://localhost:5173`
+
+##  Login Requirements
+
+The application has **specific email format requirements** for authentication:
+
+###  Student Login
+- **Email Format:** Must end with `@student.uaic.ro`
+- **Example:** `john.doe@student.uaic.ro`
+- **Password:** Any password (development mode)
+- **Access:** Student dashboard with course preferences
+
+###  Admin Login  
+- **Email Format:** Must end with `@uaic.ro`
+- **Example:** `admin@uaic.ro`
+- **Password:** Any password (development mode)
+- **Access:** Admin dashboard with allocation management
+
+###  Invalid Login Formats
+- `user@gmail.com` -  Not accepted
+- `student@uaic.com` -  Wrong domain  
+- `admin@student.uaic.ro` -  Admin using student domain
+
+## Test Accounts
+
+### Ready-to-Use Test Accounts:
+
+**Students:**
+- `john.doe@student.uaic.ro`
+- `jane.smith@student.uaic.ro`
+- `student@student.uaic.ro`
+
+**Admins:**
+- `admin@uaic.ro`
+- `secretary@uaic.ro`
+- `coordinator@uaic.ro`
+
+**Note:** Any password works in development mode.
+
+
+##  Project Structure
 
 ```
-src/
-├── assets/          # Static assets like images, icons, and SVG files
-├── components/      # React components (each component has its own folder)
-├── library/         # Common logic and utility functions unrelated to business logic
-├── models/          # Business-specific entity models and interfaces
-├── services/        # API services for backend communication, contexts, hooks, and state management
-├── index.css        # Global styles
-└── main.tsx         # Application entry point
+frontend/
+├── src/
+│   ├── components/           # React components
+│   │   ├── App/             # Main application component
+│   │   ├── Login/           # Authentication component
+│   │   ├── Dashboard/       # Dashboard components
+│   │   └── Router/          # Routing configuration
+│   ├── contexts/            # React contexts (Auth)
+│   ├── services/            # API services
+│   ├── models/              # TypeScript interfaces
+│   └── library/             # Constants and utilities
+├── public/                  # Static assets
+└── package.json            # Dependencies and scripts
 ```
 
 ### Components Structure
 
 Each component should be organized in its own folder with the following structure:
+
 ```
 ComponentName/
 ├── ComponentName.tsx          # Component implementation

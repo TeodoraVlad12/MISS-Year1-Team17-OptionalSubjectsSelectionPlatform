@@ -4,6 +4,7 @@ import { Router } from '../Router/Router';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { theme } from '../../library/theme';
 import { ServicesProvider } from '../../services/ServicesContext';
+import { AuthProvider } from '../../contexts/AuthContext';
 
 function App() {
     return (
@@ -11,7 +12,9 @@ function App() {
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <ServicesProvider>
-                    <Router />
+                    <AuthProvider>
+                        <Router />
+                    </AuthProvider>
                 </ServicesProvider>
             </ThemeProvider>
         </ErrorBoundary>

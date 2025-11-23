@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface PreferenceRepository extends JpaRepository<Preference, Long> {
     
-    List<Preference> findByStudentIdOrderByPriority(Long studentId);
+    List<Preference> findByUserIdOrderByPriority(Long userId);
     
     List<Preference> findByOptionalCourseId(Long courseId);
 }

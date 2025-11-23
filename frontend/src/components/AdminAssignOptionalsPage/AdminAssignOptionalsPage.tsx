@@ -16,13 +16,18 @@ import {
     TableRow,
     Alert,
     Chip,
+    AppBar,
+    Toolbar,
 } from '@mui/material';
+import { Home as HomeIcon, Logout, AdminPanelSettings } from '@mui/icons-material';
 import type { StudentAllocation } from '../../models/StudentAllocation';
 import { useServices } from '../../services/ServicesContext';
+import { useAuth } from '../../contexts/AuthContext';
 import './AdminAssignOptionalsPage.styles.scss';
 
 export const AdminAssignOptionalsPage = () => {
     const { allocationService } = useServices();
+    const { user: userInfo, logout } = useAuth();
     const [years, setYears] = useState<number[]>([]);
     const [specializations, setSpecializations] = useState<string[]>([]);
     const [selectedYear, setSelectedYear] = useState<number | ''>('');
@@ -81,18 +86,57 @@ export const AdminAssignOptionalsPage = () => {
         }
     };
 
+    const handleLogout = () => {
+        logout();
+    };
+
+    const handleGoHome = () => {
+        window.location.href = '/dashboard';
+    };
+
+    if (!userInfo) {
+        return null;
+    }
+
     return (
-        <div className="admin-assign-optionals-page">
-            <Box className="admin-assign-optionals-page__header">
-                <Typography variant="h4" component="h1" gutterBottom>
+        <Box>
+            <AppBar position="static">
+                <Toolbar>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        ElectiveMatch - Optional Subjects Allocation
+                    </Typography>
+                    
+                    <Box display="flex" alignItems="center" gap={2}>
+                        <Typography variant="body2">
+                            {userInfo.firstName} {userInfo.lastName}
+                        </Typography>
+                        <Button 
+                            color="inherit" 
+                            onClick={handleGoHome}
+                            startIcon={<HomeIcon />}
+                        >
+                            Home
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            onClick={handleLogout}
+                            startIcon={<Logout />}
+                        >
+                            Logout
+                        </Button>
+                    </Box>
+                </Toolbar>
+            </AppBar>
+
+            <Box p={3}>
+                <Typography variant="h4" gutterBottom>
                     Optional Subjects Allocation
                 </Typography>
-                <Typography variant="body1" color="text.secondary" paragraph>
+                <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
                     Select year and specialization, then run the allocation algorithm
                 </Typography>
-            </Box>
 
-            <Paper className="admin-assign-optionals-page__controls" elevation={2}>
+                <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
                 <Box className="admin-assign-optionals-page__controls-content">
                     <FormControl className="admin-assign-optionals-page__dropdown" disabled={loadingDropdowns}>
                         <InputLabel>Year</InputLabel>
@@ -143,53 +187,54 @@ export const AdminAssignOptionalsPage = () => {
                 </Alert>
             )}
 
-            {allocations.length > 0 && (
-                <Paper className="admin-assign-optionals-page__results" elevation={2}>
-                    <Typography variant="h5" gutterBottom className="admin-assign-optionals-page__results-title">
-                        Allocation Results
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                        {allocations.length} students assigned to optional courses
-                    </Typography>
+                {allocations.length > 0 && (
+                    <Paper sx={{ p: 3 }} elevation={2}>
+                        <Typography variant="h5" gutterBottom>
+                            Allocation Results
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                            {allocations.length} students assigned to optional courses
+                        </Typography>
 
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Student Number</TableCell>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Email</TableCell>
-                                    <TableCell>Assigned Courses</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {allocations.map((allocation) => (
-                                    <TableRow key={allocation.student.id}>
-                                        <TableCell>{allocation.student.studentNumber}</TableCell>
-                                        <TableCell>
-                                            {allocation.student.firstName} {allocation.student.lastName}
-                                        </TableCell>
-                                        <TableCell>{allocation.student.email}</TableCell>
-                                        <TableCell>
-                                            <Box className="admin-assign-optionals-page__courses">
-                                                {allocation.assignedCourses.map((course) => (
-                                                    <Chip
-                                                        key={course.id}
-                                                        label={`${course.code} - ${course.name}`}
-                                                        color="primary"
-                                                        variant="outlined"
-                                                        size="small"
-                                                    />
-                                                ))}
-                                            </Box>
-                                        </TableCell>
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Student Number</TableCell>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Email</TableCell>
+                                        <TableCell>Assigned Courses</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-            )}
-        </div>
+                                </TableHead>
+                                <TableBody>
+                                    {allocations.map((allocation) => (
+                                        <TableRow key={allocation.student.id}>
+                                            <TableCell>{allocation.student.studentNumber}</TableCell>
+                                            <TableCell>
+                                                {allocation.student.firstName} {allocation.student.lastName}
+                                            </TableCell>
+                                            <TableCell>{allocation.student.email}</TableCell>
+                                            <TableCell>
+                                                <Box display="flex" gap={1} flexWrap="wrap">
+                                                    {allocation.assignedCourses.map((course) => (
+                                                        <Chip
+                                                            key={course.id}
+                                                            label={`${course.code} - ${course.name}`}
+                                                            color="primary"
+                                                            variant="outlined"
+                                                            size="small"
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
+                )}
+            </Box>
+        </Box>
     );
 };
