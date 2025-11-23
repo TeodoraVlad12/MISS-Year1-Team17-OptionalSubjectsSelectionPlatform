@@ -85,31 +85,24 @@ export const AdminAssignOptionalsPage = () => {
         }
     };
 
-    const handleGoHome = () => {
-        window.location.href = '/dashboard';
-    };
 
-    if (!userInfo) {
-        return null;
-    }
 
     return (
         <Box>
             <TopBar 
                 title="ElectiveMatch - Optional Subjects Allocation"
                 showHomeButton={true}
-                onHomeClick={handleGoHome}
             />
 
-            <Box p={3}>
-                <Typography variant="h4" gutterBottom>
+            <Box className="admin-assign-optionals-page__container">
+                <Typography variant="h4" gutterBottom className="admin-assign-optionals-page__header">
                     Optional Subjects Allocation
                 </Typography>
-                <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+                <Typography variant="body1" color="textSecondary" className="admin-assign-optionals-page__subtitle">
                     Select year and specialization, then run the allocation algorithm
                 </Typography>
 
-                <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+                <Paper elevation={2} className="admin-assign-optionals-page__controls-paper">
                 <Box className="admin-assign-optionals-page__controls-content">
                     <FormControl className="admin-assign-optionals-page__dropdown" disabled={loadingDropdowns}>
                         <InputLabel>Year</InputLabel>
@@ -161,11 +154,11 @@ export const AdminAssignOptionalsPage = () => {
             )}
 
                 {allocations.length > 0 && (
-                    <Paper sx={{ p: 3 }} elevation={2}>
-                        <Typography variant="h5" gutterBottom>
+                    <Paper elevation={2} className="admin-assign-optionals-page__results">
+                        <Typography variant="h5" gutterBottom className="admin-assign-optionals-page__results-title">
                             Allocation Results
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="textSecondary" className="admin-assign-optionals-page__results-subtitle">
                             {allocations.length} students assigned to optional courses
                         </Typography>
 
@@ -188,7 +181,7 @@ export const AdminAssignOptionalsPage = () => {
                                             </TableCell>
                                             <TableCell>{allocation.student.email}</TableCell>
                                             <TableCell>
-                                                <Box display="flex" gap={1} flexWrap="wrap">
+                                                <Box className="admin-assign-optionals-page__courses">
                                                     {allocation.assignedCourses.map((course) => (
                                                         <Chip
                                                             key={course.id}

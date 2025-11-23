@@ -14,14 +14,12 @@ interface TopBarProps {
   title?: string;
   showRoleChip?: boolean;
   showHomeButton?: boolean;
-  onHomeClick?: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
   title = "ElectiveMatch - Optional Subjects Selection",
   showRoleChip = false,
-  showHomeButton = false,
-  onHomeClick
+  showHomeButton = false
 }) => {
   const { user: userInfo, logout } = useAuth();
 
@@ -31,6 +29,10 @@ const TopBar: React.FC<TopBarProps> = ({
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleGoHome = () => {
+    window.location.href = '/dashboard';
   };
 
   const getRoleIcon = () => {
@@ -66,7 +68,7 @@ const TopBar: React.FC<TopBarProps> = ({
           {showHomeButton && (
             <Button 
               color="inherit" 
-              onClick={onHomeClick}
+              onClick={handleGoHome}
               startIcon={<Home />}
             >
               Home
