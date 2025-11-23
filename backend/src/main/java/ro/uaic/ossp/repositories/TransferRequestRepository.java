@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface TransferRequestRepository extends JpaRepository<TransferRequest, Long> {
 
-    List<TransferRequest> findByUserId(Long userId);
+    List<TransferRequest> findByStudentId(Long studentId);
 
     List<TransferRequest> findByStatus(TransferStatus status);
 }

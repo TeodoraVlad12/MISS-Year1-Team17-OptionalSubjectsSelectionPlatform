@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ro.uaic.ossp.dtos.LoginResponseDTO;
 import ro.uaic.ossp.models.User;
+import ro.uaic.ossp.models.Student;
+import ro.uaic.ossp.models.enums.UserRole;
 import ro.uaic.ossp.repositories.UserRepository;
+import ro.uaic.ossp.repositories.StudentRepository;
 import ro.uaic.ossp.security.JwtTokenUtil;
 import ro.uaic.ossp.dtos.UaicApiResponseDTO;
 
@@ -18,6 +21,9 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     public LoginResponseDTO authenticate(String email, String password) {
@@ -28,6 +34,11 @@ public class AuthService {
         }
 
         User user = findOrCreateUser(apiResponse);
+        
+        Student student = null;
+        if (user.getRole() == UserRole.STUDENT) {
+            student = studentRepository.findByUser_Id(user.getId()).orElse(null);
+        }
 
         String token = jwtTokenUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
 
@@ -38,10 +49,10 @@ public class AuthService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .matriculationNumber(user.getMatriculationNumber())
-                .academicYear(user.getAcademicYear())
-                .specialization(user.getSpecialization())
-                .groupNumber(user.getGroupNumber())
+                .matriculationNumber(student != null ? student.getMatriculationNumber() : null)
+                .academicYear(student != null ? student.getAcademicYear() : null)
+                .specialization(student != null ? student.getSpecialization() : null)
+                .groupNumber(student != null ? student.getGroupNumber() : null)
                 .build();
     }
 
@@ -51,25 +62,39 @@ public class AuthService {
         if (user == null) {
             user = User.builder()
                     .email(apiResponse.getEmail())
-                    .matriculationNumber(apiResponse.getMatriculationNumber())
                     .firstName(apiResponse.getFirstName())
                     .lastName(apiResponse.getLastName())
-                    .academicYear(apiResponse.getAcademicYear())
-                    .specialization(apiResponse.getSpecialization())
-                    .groupNumber(apiResponse.getGroupNumber())
                     .role(apiResponse.getRole())
                     .build();
 
             user = userRepository.save(user);
+
+            if (apiResponse.getRole() == UserRole.STUDENT) {
+                Student student = Student.builder()
+                        .user(user)
+                        .matriculationNumber(apiResponse.getMatriculationNumber())
+                        .academicYear(apiResponse.getAcademicYear())
+                        .specialization(apiResponse.getSpecialization())
+                        .groupNumber(apiResponse.getGroupNumber())
+                        .build();
+                studentRepository.save(student);
+            }
         } else {
             // Update existing user with latest info from UAIC API
             user.setFirstName(apiResponse.getFirstName());
             user.setLastName(apiResponse.getLastName());
-            user.setAcademicYear(apiResponse.getAcademicYear());
-            user.setSpecialization(apiResponse.getSpecialization());
-            user.setGroupNumber(apiResponse.getGroupNumber());
-            
             user = userRepository.save(user);
+
+            if (user.getRole() == UserRole.STUDENT) {
+                Student student = studentRepository.findByUser_Id(user.getId()).orElse(null);
+                if (student != null) {
+                    student.setMatriculationNumber(apiResponse.getMatriculationNumber());
+                    student.setAcademicYear(apiResponse.getAcademicYear());
+                    student.setSpecialization(apiResponse.getSpecialization());
+                    student.setGroupNumber(apiResponse.getGroupNumber());
+                    studentRepository.save(student);
+                }
+            }
         }
 
         return user;
