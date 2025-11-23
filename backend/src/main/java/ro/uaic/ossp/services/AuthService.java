@@ -35,12 +35,13 @@ public class AuthService {
 
         User user = findOrCreateUser(apiResponse);
         
-        Student student = null;
-        if (user.getRole() == UserRole.STUDENT) {
-            student = studentRepository.findByUser_Id(user.getId()).orElse(null);
-        }
-
         String token = jwtTokenUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
+
+        // Cast to Student if it's a student to get student-specific fields
+        Student student = null;
+        if (user instanceof Student) {
+            student = (Student) user;
+        }
 
         return LoginResponseDTO.builder()
                 .token(token)
@@ -60,41 +61,42 @@ public class AuthService {
         User user = userRepository.findByEmail(apiResponse.getEmail()).orElse(null);
 
         if (user == null) {
-            user = User.builder()
-                    .email(apiResponse.getEmail())
-                    .firstName(apiResponse.getFirstName())
-                    .lastName(apiResponse.getLastName())
-                    .role(apiResponse.getRole())
-                    .build();
-
-            user = userRepository.save(user);
-
+            // Create appropriate user type based on role
             if (apiResponse.getRole() == UserRole.STUDENT) {
-                Student student = Student.builder()
-                        .user(user)
+                user = Student.studentBuilder()
+                        .email(apiResponse.getEmail())
+                        .firstName(apiResponse.getFirstName())
+                        .lastName(apiResponse.getLastName())
+                        .role(apiResponse.getRole())
                         .matriculationNumber(apiResponse.getMatriculationNumber())
                         .academicYear(apiResponse.getAcademicYear())
                         .specialization(apiResponse.getSpecialization())
                         .groupNumber(apiResponse.getGroupNumber())
                         .build();
-                studentRepository.save(student);
+            } else {
+                user = User.builder()
+                        .email(apiResponse.getEmail())
+                        .firstName(apiResponse.getFirstName())
+                        .lastName(apiResponse.getLastName())
+                        .role(apiResponse.getRole())
+                        .build();
             }
+            user = userRepository.save(user);
         } else {
             // Update existing user with latest info from UAIC API
             user.setFirstName(apiResponse.getFirstName());
             user.setLastName(apiResponse.getLastName());
-            user = userRepository.save(user);
-
-            if (user.getRole() == UserRole.STUDENT) {
-                Student student = studentRepository.findByUser_Id(user.getId()).orElse(null);
-                if (student != null) {
-                    student.setMatriculationNumber(apiResponse.getMatriculationNumber());
-                    student.setAcademicYear(apiResponse.getAcademicYear());
-                    student.setSpecialization(apiResponse.getSpecialization());
-                    student.setGroupNumber(apiResponse.getGroupNumber());
-                    studentRepository.save(student);
-                }
+            
+            // Update student-specific fields if it's a student
+            if (user instanceof Student) {
+                Student student = (Student) user;
+                student.setMatriculationNumber(apiResponse.getMatriculationNumber());
+                student.setAcademicYear(apiResponse.getAcademicYear());
+                student.setSpecialization(apiResponse.getSpecialization());
+                student.setGroupNumber(apiResponse.getGroupNumber());
             }
+            
+            user = userRepository.save(user);
         }
 
         return user;
