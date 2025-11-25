@@ -46,14 +46,11 @@ const StudentPreferences: React.FC = () => {
   }, []);
 
   const loadPackages = async () => {
-    if (!user?.academicYear || !user?.specialization) return;
+    if (!user?.userId) return;
     
     try {
       setLoading(true);
-      const packagesData = await allocationService.getCoursePackages(
-        user.academicYear,
-        user.specialization
-      );
+      const packagesData = await allocationService.getCoursePackages(user.userId);
       setPackages(packagesData);
     } catch (err) {
       setError('Failed to load course packages');
@@ -114,6 +111,8 @@ const StudentPreferences: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!user?.userId) return;
+
     // Check if all packages have complete preferences (all 3 courses ranked)
     const incompletePackages = packages.filter(pkg => {
       const packagePref = preferences.find(p => p.packageId === pkg.id);
@@ -128,7 +127,7 @@ const StudentPreferences: React.FC = () => {
     try {
       setSaving(true);
       setError(null);
-      await allocationService.saveStudentPreferences(preferences);
+      await allocationService.saveStudentPreferences(user.userId, preferences);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {

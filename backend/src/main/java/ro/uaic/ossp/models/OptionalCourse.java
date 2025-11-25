@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +41,19 @@ public class OptionalCourse {
     @Column(name = "max_students", nullable = false)
     private int maxStudents;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "package_id", insertable = false, updatable = false)
+    private Long packageId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "package_id", nullable = false)
+    @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private CoursePackage coursePackage;
 
-    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private List<Preference> preferences = new ArrayList<>();
 
-    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private List<Enrollment> enrollments = new ArrayList<>();
 }
