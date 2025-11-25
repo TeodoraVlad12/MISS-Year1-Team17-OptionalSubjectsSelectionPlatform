@@ -1,5 +1,11 @@
 import { ApiService } from "./ApiService";
 import type { StudentAllocation } from "../models/StudentAllocation";
+import type { OptionalCourse } from "../models/OptionalCourse";
+
+interface CoursePreference {
+    courseId: number;
+    priority: number;
+}
 
 export class AllocationService extends ApiService {
     constructor(baseUrl: string) {
@@ -28,19 +34,19 @@ export class AllocationService extends ApiService {
     }
 
     async assignOptionals(
-        year: number,
-        specialization: string
+        // year: number,
+        // specialization: string
     ): Promise<StudentAllocation[]> {
         return new Promise((resolve) => {
             setTimeout(() => {
-                resolve(this.getMockedAllocations(year, specialization));
+                resolve(this.getMockedAllocations(/*year, specialization*/));
             }, 1000);
         });
     }
 
     private getMockedAllocations(
-        year: number,
-        specialization: string
+        // year: number,
+        // specialization: string
     ): StudentAllocation[] {
         return [
             {
@@ -113,5 +119,28 @@ export class AllocationService extends ApiService {
                 ],
             },
         ];
+    }
+
+    async getOptionalCourses(/*academicYear: number, specialization: string*/): Promise<OptionalCourse[]> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve([
+                    { id: 101, name: "Advanced Algorithms", code: "CS301", maxStudents: 30 },
+                    { id: 102, name: "Machine Learning", code: "CS302", maxStudents: 25 },
+                    { id: 103, name: "Web Development", code: "CS303", maxStudents: 28 },
+                    { id: 104, name: "Database Systems", code: "CS304", maxStudents: 32 },
+                    { id: 105, name: "Software Engineering", code: "CS305", maxStudents: 30 },
+                ]);
+            }, 500);
+        });
+    }
+
+    async saveStudentPreferences(preferences: CoursePreference[]): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log('Saving preferences:', preferences);
+                resolve();
+            }, 800);
+        });
     }
 }
