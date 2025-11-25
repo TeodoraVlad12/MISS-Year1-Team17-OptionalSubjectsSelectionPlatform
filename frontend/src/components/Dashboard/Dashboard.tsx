@@ -7,7 +7,7 @@ import {
   Button,
   Chip
 } from '@mui/material';
-import { School, AdminPanelSettings } from '@mui/icons-material';
+import { School, AdminPanelSettings, Assignment } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import TopBar from '../TopBar/TopBar';
 
@@ -124,9 +124,22 @@ const Dashboard: React.FC = () => {
             </Typography>
             
             {userInfo.role === 'STUDENT' ? (
-              <Typography variant="body2" color="textSecondary">
-                Features for students like preference submission and viewing assignments will be implemented here.
-              </Typography>
+              <Box>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                  Submit your preferences for optional courses.
+                </Typography>
+                
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<Assignment />}
+                  onClick={() => window.location.href = '/preferences'}
+                  sx={{ mr: 2 }}
+                >
+                  Select Course Preferences
+                </Button>
+              </Box>
             ) : (
               <Box>
                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
