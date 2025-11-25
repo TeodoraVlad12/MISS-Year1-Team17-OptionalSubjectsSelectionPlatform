@@ -49,11 +49,11 @@ public class OptionalCourse {
     @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private CoursePackage coursePackage;
 
-    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private List<Preference> preferences = new ArrayList<>();
 
-    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore // breaks circular dependency when json serializing through api endpoint
     private List<Enrollment> enrollments = new ArrayList<>();
 }
