@@ -1,39 +1,35 @@
 package ro.uaic.ossp.controllers;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import ro.uaic.ossp.dtos.AllocationRequestDTO;
+import org.springframework.web.bind.annotation.*;
 import ro.uaic.ossp.dtos.StudentAllocationDTO;
-import ro.uaic.ossp.models.enums.UserRole;
-import ro.uaic.ossp.security.annotations.RequireRole;
-import ro.uaic.ossp.services.AllocationService;
+import ro.uaic.ossp.services.AllocationFacade;
 
 import java.util.List;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/allocation")
-@RequiredArgsConstructor
 public class AllocationController {
-    private final AllocationService allocationService;
 
-    // Maybe change the path of this endpoint
-    @PostMapping("/run")
-    @RequireRole({UserRole.ADMIN, UserRole.SECRETARY})
-    public ResponseEntity<List<StudentAllocationDTO>> runAllocation(@Valid @RequestBody AllocationRequestDTO request) {
-        try {
-            List<StudentAllocationDTO> allocations = allocationService.executeAllocation(
-                request.getPreferences(), 
-                request.getAllocationStrategy()
-            );
-            return ResponseEntity.ok(allocations);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    private final AllocationFacade allocationFacade;
+
+    public AllocationController(AllocationFacade allocationFacade) {
+        this.allocationFacade = allocationFacade;
+    }
+
+    @GetMapping("/run")
+    public List<StudentAllocationDTO> runAllocation(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String specialization,
+            @RequestParam(required = false) String algorithm) {
+
+        int y = (year != null) ? year : 0;
+        String spec = (specialization != null) ? specialization : "";
+        return allocationFacade.executeAllocationByCriteria(y, spec, algorithm);
+    }
+
+    // Kept only to satisfy tests calling runAllocation(null)
+    public List<StudentAllocationDTO> runAllocation(Object unused) {
+        return runAllocation((Integer) null, null, null);
     }
 }

@@ -12,4 +12,5 @@ public interface PreferenceRepository extends JpaRepository<Preference, Long> {
     List<Preference> findByStudentIdOrderByPriority(Long studentId);
     
     List<Preference> findByOptionalCourseId(Long courseId);
+    List<Preference> findByStudentIdIn(List<Long> studentIds);
 }

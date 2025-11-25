@@ -65,12 +65,12 @@ public class ExecutionTimeAspect {
                 resultSummary = text.length() > 200 ? text.substring(0, 200) + "...(truncated)" : text;
             }
 
-            log.info("✅ END [{}#{}] executed in {} ms | Result: {}", className, methodName, duration, resultSummary);
+            log.info("END [{}#{}] executed in {} ms | Result: {}", className, methodName, duration, resultSummary);
             return result;
 
         } catch (Exception ex) {
             long duration = (System.nanoTime() - start) / 1_000_000;
-            log.error("❌ ERROR in [{}#{}] after {} ms | Exception: {} - {}",
+            log.error("ERROR in [{}#{}] after {} ms | Exception: {} - {}",
                     className, methodName, duration,
                     ex.getClass().getSimpleName(), ex.getMessage(), ex);
 

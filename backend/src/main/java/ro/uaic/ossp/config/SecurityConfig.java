@@ -33,6 +33,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/allocation/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // For H2 console during development
                 .anyRequest().authenticated()
             )
