@@ -1,39 +1,34 @@
 package ro.uaic.ossp.controllers;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.*;
 import ro.uaic.ossp.dtos.AllocationRequestDTO;
 import ro.uaic.ossp.dtos.StudentAllocationDTO;
-import ro.uaic.ossp.models.enums.UserRole;
-import ro.uaic.ossp.security.annotations.RequireRole;
-import ro.uaic.ossp.services.AllocationService;
+import ro.uaic.ossp.services.AllocationFacade;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/allocation")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // allow local frontend during development
 public class AllocationController {
-    private final AllocationService allocationService;
 
-    // Maybe change the path of this endpoint
+    private final AllocationFacade allocationFacade;
+
+    public AllocationController(AllocationFacade allocationFacade) {
+        this.allocationFacade = allocationFacade;
+    }
+
     @PostMapping("/run")
-    @RequireRole({UserRole.ADMIN, UserRole.SECRETARY})
-    public ResponseEntity<List<StudentAllocationDTO>> runAllocation(@Valid @RequestBody AllocationRequestDTO request) {
-        try {
-            List<StudentAllocationDTO> allocations = allocationService.executeAllocation(
-                request.getPreferences(), 
-                request.getAllocationStrategy()
-            );
-            return ResponseEntity.ok(allocations);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public List<StudentAllocationDTO> runAllocation(@RequestBody(required = false) AllocationRequestDTO req) {
+        Integer year = req != null ? req.getYear() : null;
+        String specialization = req != null ? req.getSpecialization() : null;
+        String algorithm = req != null ? req.getAlgorithm() : null;
+        return runAllocationInternal(year, specialization, algorithm);
+    }
+
+    private List<StudentAllocationDTO> runAllocationInternal(Integer year, String specialization, String algorithm) {
+        int y = (year != null) ? year : 0;
+        String spec = (specialization != null) ? specialization : "";
+        return allocationFacade.executeAllocationByCriteria(y, spec, algorithm);
     }
 }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Entity
 @DiscriminatorValue("STUDENT")
 public class Student extends User {
-    
+
     @Column(name = "matriculation_number", unique = true)
     private String matriculationNumber;
 
@@ -39,4 +39,14 @@ public class Student extends User {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TransferRequest> transferRequests = new ArrayList<>();
+
+    // helper to satisfy service code that expects a full name
+    public String getFullName() {
+        String first = (this.getFirstName() != null) ? this.getFirstName().trim() : "";
+        String last  = (this.getLastName()  != null) ? this.getLastName().trim()  : "";
+        if (!first.isEmpty() && !last.isEmpty()) return first + " " + last;
+        if (!first.isEmpty()) return first;
+        if (!last.isEmpty()) return last;
+        return String.valueOf(this.getId());
+    }
 }

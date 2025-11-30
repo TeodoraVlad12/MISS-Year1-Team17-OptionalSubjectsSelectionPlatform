@@ -17,10 +17,8 @@ import {
     Alert,
     Chip,
 } from '@mui/material';
-import { AdminPanelSettings } from '@mui/icons-material';
 import type { StudentAllocation } from '../../models/StudentAllocation';
 import { useServices } from '../../services/ServicesContext';
-import { useAuth } from '../../contexts/AuthContext';
 import TopBar from '../TopBar/TopBar';
 import './AdminAssignOptionalsPage.styles.scss';
 
@@ -163,31 +161,27 @@ export const AdminAssignOptionalsPage = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Student Number</TableCell>
+                                        <TableCell>Student Id</TableCell>
                                         <TableCell>Name</TableCell>
-                                        <TableCell>Email</TableCell>
                                         <TableCell>Assigned Courses</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {allocations.map((allocation) => (
-                                        <TableRow key={allocation.student.id}>
-                                            <TableCell>{allocation.student.studentNumber}</TableCell>
+                                        <TableRow key={allocation.studentId}>
+                                            <TableCell>{allocation.studentId}</TableCell>
                                             <TableCell>
-                                                {allocation.student.firstName} {allocation.student.lastName}
+                                                {allocation.studentName}
                                             </TableCell>
-                                            <TableCell>{allocation.student.email}</TableCell>
                                             <TableCell>
                                                 <Box className="admin-assign-optionals-page__courses">
-                                                    {allocation.assignedCourses.map((course) => (
                                                         <Chip
-                                                            key={course.id}
-                                                            label={`${course.code} - ${course.name}`}
+                                                            key={allocation.allocatedCourseId ?? 'none'}
+                                                            label={`${allocation.allocatedCourseName ?? 'None'}`}
                                                             color="primary"
                                                             variant="outlined"
                                                             size="small"
                                                         />
-                                                    ))}
                                                 </Box>
                                             </TableCell>
                                         </TableRow>

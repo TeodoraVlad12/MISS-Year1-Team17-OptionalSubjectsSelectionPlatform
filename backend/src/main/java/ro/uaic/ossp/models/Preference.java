@@ -36,4 +36,36 @@ public class Preference {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private OptionalCourse optionalCourse;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public OptionalCourse getOptionalCourse() {
+        return optionalCourse;
+    }
+
+    public void setOptionalCourse(OptionalCourse optionalCourse) {
+        this.optionalCourse = optionalCourse;
+    }
 }
