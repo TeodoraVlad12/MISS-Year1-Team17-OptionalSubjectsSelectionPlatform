@@ -25,128 +25,75 @@ export class AllocationService extends ApiService {
     }
 
     async getYears(): Promise<number[]> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve([1, 2, 3]);
-            }, 300);
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/students/years`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend error:', response.status, errorText);
+                throw new Error(`Failed to get years: ${response.status} ${errorText}`);
+            }
+            return response.body ? await response.json() : [];
+        } catch (error) {
+            console.error('Get years error:', error);
+            throw error;
+        }
     }
 
     async getSpecializations(): Promise<string[]> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve([
-                    "Computer Science",
-                    "Software Engineering",
-                    "Information Systems",
-                    "Artificial Intelligence",
-                ]);
-            }, 300);
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/students/specializations`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend error:', response.status, errorText);
+                throw new Error(`Failed to get specializations: ${response.status} ${errorText}`);
+            }
+            return response.body ? await response.json() : [];
+        } catch (error) {
+            console.error('Get specializations error:', error);
+            throw error;
+        }
     }
 
     async assignOptionals(
-        // year: number,
-        // specialization: string
+        year: number,
+        specialization: string
     ): Promise<StudentAllocation[]> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(this.getMockedAllocations(/*year, specialization*/));
-            }, 1000);
-        });
-    }
-
-    private getMockedAllocations(
-        // year: number,
-        // specialization: string
-    ): StudentAllocation[] {
-        return [
-            {
-                student: {
-                    id: 1,
-                    firstName: "Ion",
-                    lastName: "Popescu",
-                    email: "ion.popescu@student.uaic.ro",
-                    studentNumber: "A12345",
+        try {
+            const response = await fetch(`${this.baseUrl}/api/allocation/run`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 },
-                assignedCourses: [
-                    {
-                        id: 101,
-                        name: "Advanced Algorithms",
-                        code: "CS301",
-                        maxStudents: 30,
-                    },
-                    {
-                        id: 102,
-                        name: "Machine Learning",
-                        code: "CS302",
-                        maxStudents: 25,
-                    },
-                ],
-            },
-            {
-                student: {
-                    id: 2,
-                    firstName: "Maria",
-                    lastName: "Ionescu",
-                    email: "maria.ionescu@student.uaic.ro",
-                    studentNumber: "A12346",
-                },
-                assignedCourses: [
-                    {
-                        id: 103,
-                        name: "Web Development",
-                        code: "CS303",
-                        maxStudents: 28,
-                    },
-                    {
-                        id: 104,
-                        name: "Database Systems",
-                        code: "CS304",
-                        maxStudents: 32,
-                    },
-                ],
-            },
-            {
-                student: {
-                    id: 3,
-                    firstName: "Andrei",
-                    lastName: "Vasilescu",
-                    email: "andrei.vasilescu@student.uaic.ro",
-                    studentNumber: "A12347",
-                },
-                assignedCourses: [
-                    {
-                        id: 101,
-                        name: "Advanced Algorithms",
-                        code: "CS301",
-                        maxStudents: 30,
-                    },
-                    {
-                        id: 105,
-                        name: "Software Engineering",
-                        code: "CS305",
-                        maxStudents: 30,
-                    },
-                ],
-            },
-        ];
-    }
+                body: JSON.stringify({ year, specialization })
+            });
 
-    async getOptionalCourses(/*academicYear: number, specialization: string*/): Promise<OptionalCourse[]> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve([
-                    { id: 101, name: "Advanced Algorithms", code: "CS301", maxStudents: 30 },
-                    { id: 102, name: "Machine Learning", code: "CS302", maxStudents: 25 },
-                    { id: 103, name: "Web Development", code: "CS303", maxStudents: 28 },
-                    { id: 104, name: "Database Systems", code: "CS304", maxStudents: 32 },
-                    { id: 105, name: "Software Engineering", code: "CS305", maxStudents: 30 },
-                ]);
-            }, 500);
-        });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend error:', response.status, errorText);
+                throw new Error(`Failed to run allocation: ${response.status} ${errorText}`);
+            }
+            return response.body ? await response.json() : [];
+        } catch (error) {
+            console.error('Run allocation error:', error);
+            throw error;
+        }
     }
-
+    
     async getCoursePackages(studentId: number): Promise<CoursePackage[]> {
         try {
             const response = await fetch(`${this.baseUrl}/api/students/${studentId}/optionals`, {

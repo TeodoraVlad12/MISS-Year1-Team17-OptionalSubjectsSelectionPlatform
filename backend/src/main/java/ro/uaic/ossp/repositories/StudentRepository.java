@@ -1,16 +1,19 @@
 package ro.uaic.ossp.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ro.uaic.ossp.models.OptionalCourse;
 import ro.uaic.ossp.models.Student;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByMatriculationNumber(String matriculationNumber);
     Optional<Student> findByEmail(String email);
-//    Optional<Student> findByStudentNumber(String studentNumber);
 
     @Query("""
         SELECT oc FROM OptionalCourse oc
@@ -18,4 +21,11 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
         AND oc.coursePackage.level = :specialization
     """)
     List<OptionalCourse> findOptionalsForYearAndSpecialization(int year, String specialization);
+    List<Student> findByAcademicYearAndSpecialization(Integer academicYear, String specialization);
+
+    @Query("SELECT DISTINCT s.academicYear FROM Student s WHERE s.academicYear IS NOT NULL")
+    Set<Integer> findAllDistinctAcademicYears();
+
+    @Query("SELECT DISTINCT s.specialization FROM Student s WHERE s.specialization IS NOT NULL")
+    Set<String> findAllDistinctSpecializations();
 }

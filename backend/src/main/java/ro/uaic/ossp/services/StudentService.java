@@ -67,4 +67,12 @@ public class StudentService {
         }
         return result;
     }
+
+    public Set<Integer> getAllStudentYears() {
+        return studentRepository.findAllDistinctAcademicYears();
+    }
+
+    public Set<String> getAllSpecializations() {
+        return studentRepository.findAllDistinctSpecializations();
+    }
 }

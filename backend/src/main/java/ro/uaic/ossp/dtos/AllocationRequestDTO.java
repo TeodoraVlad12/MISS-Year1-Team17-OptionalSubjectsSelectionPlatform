@@ -10,14 +10,19 @@ import ro.uaic.ossp.models.enums.AllocationStrategy;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class AllocationRequestDTO {
-    @NotEmpty(message = "Preferences list cannot be empty")
-    @Valid
-    private List<PreferenceDTO> preferences;
+    private Integer year;
+    private String specialization;
+    private String algorithm;
 
-    @NotNull(message = "Allocation strategy cannot be null")
-    private AllocationStrategy allocationStrategy;
+    public AllocationRequestDTO() {}
+
+    public Integer getYear() { return year; }
+    public void setYear(Integer year) { this.year = year; }
+
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
+
+    public String getAlgorithm() { return algorithm; }
+    public void setAlgorithm(String algorithm) { this.algorithm = algorithm; }
 }
