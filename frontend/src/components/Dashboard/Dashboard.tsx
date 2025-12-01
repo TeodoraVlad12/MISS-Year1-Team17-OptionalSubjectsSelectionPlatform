@@ -143,19 +143,40 @@ const Dashboard: React.FC = () => {
             ) : (
               <Box>
                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                  Manage optional subjects and execute allocations.
+                  Manage optional subjects, course requirements, grades, and execute allocations.
                 </Typography>
                 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  startIcon={<AdminPanelSettings />}
-                  onClick={() => window.location.href = '/optionals/assign'}
-                  sx={{ mr: 2 }}
-                >
-                  Manage Optional Subject Assignments
-                </Button>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    startIcon={<AdminPanelSettings />}
+                    onClick={() => window.location.href = '/optionals/assign'}
+                  >
+                    Manage Optional Assignments
+                  </Button>
+                  
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    size="large"
+                    startIcon={<School />}
+                    onClick={() => window.location.href = '/course-requirements'}
+                  >
+                    Course Requirements
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                    startIcon={<Assignment />}
+                    onClick={() => window.location.href = '/grade-upload'}
+                  >
+                    Upload Grades
+                  </Button>
+                </Box>
               </Box>
             )}
           </CardContent>

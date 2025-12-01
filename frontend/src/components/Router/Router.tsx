@@ -2,6 +2,8 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import type { Route } from './Router.types';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { AdminAssignOptionalsPage } from '../AdminAssignOptionalsPage/AdminAssignOptionalsPage';
+import CourseRequirements from '../CourseRequirements/CourseRequirements';
+import GradeUploadPage from '../GradeUploadPage/GradeUploadPage';
 import Login from '../Login/Login';
 import Dashboard from '../Dashboard/Dashboard';
 import StudentPreferences from '../StudentPreferences/StudentPreferences';
@@ -11,6 +13,8 @@ import { RoleProtectedRoute } from '../RoleProtectedRoute/RoleProtectedRoute';
 import { PublicRoute } from '../PublicRoute/PublicRoute';
 
 export const ASSIGN_OPTIONALS_PATH = "/optionals/assign";
+export const COURSE_REQUIREMENTS_PATH = "/course-requirements";
+export const GRADE_UPLOAD_PATH = "/grade-upload";
 export const STUDENT_PREFERENCES_PATH = "/preferences";
 export const LOGIN_PATH = "/login";
 export const DASHBOARD_PATH = "/dashboard";
@@ -41,6 +45,22 @@ const routes: Route[] = [
         element: (
           <RoleProtectedRoute requiredRole="ADMIN">
             <AdminAssignOptionalsPage />
+          </RoleProtectedRoute>
+        ),
+    },
+    {
+        path: COURSE_REQUIREMENTS_PATH,
+        element: (
+          <RoleProtectedRoute requiredRole="ADMIN">
+            <CourseRequirements />
+          </RoleProtectedRoute>
+        ),
+    },
+    {
+        path: GRADE_UPLOAD_PATH,
+        element: (
+          <RoleProtectedRoute requiredRole="ADMIN">
+            <GradeUploadPage />
           </RoleProtectedRoute>
         ),
     },

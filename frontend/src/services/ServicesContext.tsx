@@ -2,11 +2,13 @@ import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { AllocationService } from './AllocationService';
 import { AuthService } from './AuthService';
+import { GradeService } from './GradeService';
 import { BACKEND_BASE_URL } from '../library/constants';
 
 interface Services {
     allocationService: AllocationService;
     authService: AuthService;
+    gradeService: GradeService;
 }
 
 const ServicesContext = createContext<Services | undefined>(undefined);
@@ -15,6 +17,7 @@ export const ServicesProvider = ({ children }: { children: ReactNode }) => {
     const services: Services = {
         allocationService: new AllocationService(BACKEND_BASE_URL),
         authService: new AuthService(BACKEND_BASE_URL),
+        gradeService: new GradeService(BACKEND_BASE_URL),
     };
 
     return (
