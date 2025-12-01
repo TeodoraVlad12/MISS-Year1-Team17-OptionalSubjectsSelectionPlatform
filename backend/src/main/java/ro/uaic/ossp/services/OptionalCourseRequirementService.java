@@ -20,6 +20,7 @@ public class OptionalCourseRequirementService {
     private final MandatoryCourseRepository mandatoryRepo;
     private final OptionalCourseRepository optionalRepo;
 
+    @Transactional(readOnly = true)
     public List<OptionalCourseRequirementResponseDTO> getRequirements(Long optionalId) {
         return reqRepo.findByOptionalCourseId(optionalId)
                 .stream()
@@ -42,13 +43,13 @@ public class OptionalCourseRequirementService {
         MandatoryCourse mandatory = mandatoryRepo.findById(dto.getMandatoryCourseId())
                 .orElseThrow(() -> new NotFoundException("Mandatory course not found"));
 
-        if (reqRepo.existsByOptionalCourseIdAndMandatoryCourseId(optionalId, dto.getMandatoryCourseId())) {
-            throw new BadRequestException("This mandatory course already has a percentage assigned.");
-        }
+        // Note: Duplicate validation is handled by the frontend since we use delete-then-create pattern
 
         if (dto.getPercentage() < 0 || dto.getPercentage() > 100) {
             throw new BadRequestException("Percentage must be between 0 and 100");
         }
+
+        // Note: Total percentage validation is handled by the frontend since we use delete-then-create pattern
 
         OptionalCourseRequirement req = OptionalCourseRequirement.builder()
                 .mandatoryCourse(mandatory)
@@ -76,6 +77,26 @@ public class OptionalCourseRequirementService {
 
         if (dto.getPercentage() < 0 || dto.getPercentage() > 100) {
             throw new BadRequestException("Percentage must be between 0 and 100");
+        }
+
+        // Check if the new mandatory course is already assigned to this optional course (excluding current requirement)
+        if (!req.getMandatoryCourse().getId().equals(dto.getMandatoryCourseId()) && 
+            reqRepo.existsByOptionalCourseIdAndMandatoryCourseId(req.getOptionalCourse().getId(), dto.getMandatoryCourseId())) {
+            throw new BadRequestException("This mandatory course is already assigned to this optional course");
+        }
+
+        // Validate that total percentages don't exceed 100 (excluding current requirement)
+        double currentTotal = reqRepo.findByOptionalCourseId(req.getOptionalCourse().getId())
+                .stream()
+                .filter(r -> !r.getId().equals(id)) // Exclude current requirement from total
+                .mapToDouble(OptionalCourseRequirement::getPercentage)
+                .sum();
+                
+        if (currentTotal + dto.getPercentage() > 100) {
+            throw new BadRequestException(
+                String.format("Total percentage cannot exceed 100%%. Current total (excluding this requirement): %.1f%%, " +
+                            "updating to %.1f%% would result in %.1f%%", 
+                            currentTotal, dto.getPercentage(), currentTotal + dto.getPercentage()));
         }
 
         req.setMandatoryCourse(mandatory);
