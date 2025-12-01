@@ -28,9 +28,9 @@ public class OptionalCourse extends CourseBase {
     @JoinColumn(name = "package_id", nullable = false)
     private CoursePackage coursePackage;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Preference> preferences = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "optionalCourse", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Enrollment> enrollments = new ArrayList<>();
 }
