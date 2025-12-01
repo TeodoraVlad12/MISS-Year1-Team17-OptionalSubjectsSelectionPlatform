@@ -4,12 +4,14 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { AdminAssignOptionalsPage } from '../AdminAssignOptionalsPage/AdminAssignOptionalsPage';
 import Login from '../Login/Login';
 import Dashboard from '../Dashboard/Dashboard';
+import StudentPreferences from '../StudentPreferences/StudentPreferences';
 import { RouteError } from '../RouteError/RouteError';
 import { ProtectedRoute } from '../ProtectedRoute/ProtectedRoute';
 import { RoleProtectedRoute } from '../RoleProtectedRoute/RoleProtectedRoute';
 import { PublicRoute } from '../PublicRoute/PublicRoute';
 
 export const ASSIGN_OPTIONALS_PATH = "/optionals/assign";
+export const STUDENT_PREFERENCES_PATH = "/preferences";
 export const LOGIN_PATH = "/login";
 export const DASHBOARD_PATH = "/dashboard";
 
@@ -39,6 +41,14 @@ const routes: Route[] = [
         element: (
           <RoleProtectedRoute requiredRole="ADMIN">
             <AdminAssignOptionalsPage />
+          </RoleProtectedRoute>
+        ),
+    },
+    {
+        path: STUDENT_PREFERENCES_PATH,
+        element: (
+          <RoleProtectedRoute requiredRole="STUDENT">
+            <StudentPreferences />
           </RoleProtectedRoute>
         ),
     },
