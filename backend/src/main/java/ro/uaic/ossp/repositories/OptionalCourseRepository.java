@@ -13,4 +13,5 @@ public interface OptionalCourseRepository extends JpaRepository<OptionalCourse, 
     Optional<OptionalCourse> findByCode(String code);
 
     List<OptionalCourse> findByCoursePackageId(Long packageId);
+    Optional<OptionalCourse> findByNameIgnoreCase(String name);
 }
