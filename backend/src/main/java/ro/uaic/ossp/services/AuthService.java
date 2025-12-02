@@ -1,8 +1,10 @@
 package ro.uaic.ossp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ro.uaic.ossp.dtos.LoginResponseDTO;
+import ro.uaic.ossp.dtos.RegisterRequestDTO;
 import ro.uaic.ossp.models.User;
 import ro.uaic.ossp.models.Student;
 import ro.uaic.ossp.models.enums.UserRole;
@@ -24,17 +26,20 @@ public class AuthService {
     private StudentRepository studentRepository;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     public LoginResponseDTO authenticate(String email, String password) {
         UaicApiResponseDTO apiResponse = uaicApiService.authenticateUser(email, password);
-        
+
         if (apiResponse == null || !apiResponse.isAuthenticated()) {
             throw new RuntimeException("Invalid credentials");
         }
 
         User user = findOrCreateUser(apiResponse);
-        
+
         String token = jwtTokenUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
 
         // Cast to Student if it's a student to get student-specific fields
@@ -86,7 +91,7 @@ public class AuthService {
             // Update existing user with latest info from UAIC API
             user.setFirstName(apiResponse.getFirstName());
             user.setLastName(apiResponse.getLastName());
-            
+
             // Update student-specific fields if it's a student
             if (user instanceof Student) {
                 Student student = (Student) user;
@@ -95,11 +100,35 @@ public class AuthService {
                 student.setSpecialization(apiResponse.getSpecialization());
                 student.setGroupNumber(apiResponse.getGroupNumber());
             }
-            
+
             user = userRepository.save(user);
         }
 
         return user;
+    }
+
+    public User registerStudent(RegisterRequestDTO req) {
+        if (userRepository.findByEmail(req.getEmail()).isPresent()) {
+            throw new RuntimeException("User already exists");
+        }
+
+        Student student = Student.builder()
+                .email(req.getEmail())
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .matriculationNumber(req.getMatriculationNumber())
+                .academicYear(req.getAcademicYear())
+                .specialization(req.getSpecialization())
+                .groupNumber(req.getGroupNumber())
+                .build();
+
+        student.setPassword(passwordEncoder.encode(req.getPassword()));
+        student.setRole(UserRole.STUDENT);
+
+        // use the StudentRepository to save the concrete entity
+        Student saved = studentRepository.save(student);
+
+        return saved;
     }
 
     public boolean validateToken(String token) {

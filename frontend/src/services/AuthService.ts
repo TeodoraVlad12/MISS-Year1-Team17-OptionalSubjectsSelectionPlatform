@@ -18,6 +18,24 @@ interface LoginResponse {
   groupNumber?: string;
 }
 
+export type RegisterRequest = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  matriculationNumber?: string;
+  academicYear?: number;
+  specialization?: string;
+  groupNumber?: string;
+};
+
+export type RegisterResponse = {
+  success?: boolean;
+  message?: string;
+  monitorMessages?: string[];
+  [key: string]: any;
+};
+
 export class AuthService extends ApiService {
   constructor(baseUrl: string) {
     super(baseUrl, '/api/auth');
@@ -26,17 +44,49 @@ export class AuthService extends ApiService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await fetch(`${this.baseUrl}/api/auth/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
 
     if (!response.ok) {
-      throw new Error(`Login failed: ${response.statusText}`);
+      const err = await this.parseError(response);
+      throw new Error(`Login failed: ${err}`);
     }
 
     return response.json();
+  }
+
+  private async parseError(response: Response): Promise<string> {
+    try {
+      const json = await response.json();
+      if (json && (json.message || json.error)) return json.message || json.error;
+      return JSON.stringify(json);
+    } catch {
+      try {
+        return await response.text();
+      } catch {
+        return `HTTP ${response.status}`;
+      }
+    }
+  }
+
+  async register(payload: RegisterRequest): Promise<RegisterResponse> {
+    const response = await fetch(`${this.baseUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      try {
+        return (await response.json()) as RegisterResponse;
+      } catch {
+        return { success: true, message: 'Registered' };
+      }
+    }
+
+    const err = await this.parseError(response);
+    throw new Error(err || 'Registration failed');
   }
 
   async validateToken(token: string): Promise<boolean> {
@@ -44,7 +94,7 @@ export class AuthService extends ApiService {
       const response = await fetch(`${this.baseUrl}/api/auth/validate`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
