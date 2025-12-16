@@ -151,7 +151,7 @@ public class GradeService {
                         .orElse(null));
     }
 
-    private String[] splitCsvLine(String line) {
+    public String[] splitCsvLine(String line) {
         List<String> tokens = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         boolean inQuotes = false;
