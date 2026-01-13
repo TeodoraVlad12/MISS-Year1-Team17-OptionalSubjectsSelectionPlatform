@@ -20,7 +20,7 @@ public class RegistrationMonitor {
         this.maxPerGroup = maxPerGroup;
     }
 
-    // Synchronously checks simple rules and returns messages for frontend display
+    // Synchronously checks simple rules
     public List<String> checkRegistration(Student student) {
         List<String> messages = new ArrayList<>();
         try {

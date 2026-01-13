@@ -1,0 +1,32 @@
+{
+  "scenario": "Real Student Preferences Demo - Year 1 MISS",
+  "preferences": [
+    {"studentId": 1, "studentName": "Tomuleţ C. Maria-Alexandra", "courseId": 101, "priority": 1},
+    {"studentId": 1, "studentName": "Tomuleţ C. Maria-Alexandra", "courseId": 102, "priority": 2},
+    {"studentId": 1, "studentName": "Tomuleţ C. Maria-Alexandra", "courseId": 103, "priority": 3},
+
+    {"studentId": 2, "studentName": "Toader F. Adrian", "courseId": 102, "priority": 1},
+    {"studentId": 2, "studentName": "Toader F. Adrian", "courseId": 101, "priority": 2},
+    {"studentId": 2, "studentName": "Toader F. Adrian", "courseId": 104, "priority": 3},
+
+    {"studentId": 3, "studentName": "Ursache A.L. Ana-Maria", "courseId": 103, "priority": 1},
+    {"studentId": 3, "studentName": "Ursache A.L. Ana-Maria", "courseId": 101, "priority": 2},
+    {"studentId": 3, "studentName": "Ursache A.L. Ana-Maria", "courseId": 102, "priority": 3},
+
+    {"studentId": 4, "studentName": "Savin I.G. Ionuţ-Cristian", "courseId": 104, "priority": 1},
+    {"studentId": 4, "studentName": "Savin I.G. Ionuţ-Cristian", "courseId": 101, "priority": 2},
+    {"studentId": 4, "studentName": "Savin I.G. Ionuţ-Cristian", "courseId": 103, "priority": 3},
+
+    {"studentId": 5, "studentName": "Bejan M. Paul-Eusebiu", "courseId": 101, "priority": 1},
+    {"studentId": 5, "studentName": "Bejan M. Paul-Eusebiu", "courseId": 102, "priority": 2},
+
+    {"studentId": 6, "studentName": "Bindiu D. Ana-Maria", "courseId": 102, "priority": 1},
+    {"studentId": 6, "studentName": "Bindiu D. Ana-Maria", "courseId": 104, "priority": 2}
+  ],
+  "courses": {
+    "101": {"name": "Web Development", "code": "CS001", "capacity": 2},
+    "102": {"name": "Mobile Applications", "code": "CS002", "capacity": 2},
+    "103": {"name": "Database Systems", "code": "CS003", "capacity": 1},
+    "104": {"name": "Software Engineering", "code": "CS004", "capacity": 2}
+  }
+}
