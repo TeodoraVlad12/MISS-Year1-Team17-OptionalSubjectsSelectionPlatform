@@ -1,4 +1,4 @@
-package ro.uaic.ossp.monitor;
+package ro.uaic.ossp.monitors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
