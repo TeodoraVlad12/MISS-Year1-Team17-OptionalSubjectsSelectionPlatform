@@ -8,17 +8,12 @@ import ro.uaic.ossp.dtos.GradeUploadResultDTO;
 import ro.uaic.ossp.models.CourseBase;
 import ro.uaic.ossp.models.Grade;
 import ro.uaic.ossp.models.GradeEntry;
-import ro.uaic.ossp.models.OptionalCourse;
 import ro.uaic.ossp.repositories.GradeRepository;
-import ro.uaic.ossp.repositories.MandatoryCourseRepository;
-import ro.uaic.ossp.repositories.OptionalCourseRepository;
 import ro.uaic.ossp.security.exceptions.BadRequestException;
 import ro.uaic.ossp.security.exceptions.NotFoundException;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service for CSV upload. CSV format:
@@ -28,144 +23,133 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class GradeService {
-
     private final GradeRepository gradeRepo;
-    private final MandatoryCourseRepository mandatoryRepo;
-    private final OptionalCourseRepository optionalRepo;
+    private final CourseService courseService; // NEW: Extract course logic
+    private final CsvParser csvParser; // NEW: Extract CSV parsing
 
     @Transactional
     public GradeUploadResultDTO uploadCsv(MultipartFile file, boolean overwriteIfExists) {
+        validateFile(file);
+
+        CsvData csvData = csvParser.parse(file); // EXTRACT CLASS
+        validateCsvHeaders(csvData.getHeaders());
+
+        Map<String, CourseBase> courseMap = courseService.loadCourses(csvData.getCourseNames()); // EXTRACT METHOD
+        validateCourses(courseMap, csvData.getCourseNames());
+
+        UploadStatistics stats = processCsvRows(csvData, courseMap, overwriteIfExists); // EXTRACT METHOD
+
+        return buildUploadResult(stats); // EXTRACT METHOD
+    }
+
+    private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("CSV file is empty");
         }
+    }
 
-        int totalRows = 0, inserted = 0, updated = 0, skipped = 0;
-        List<String> errors = new ArrayList<>();
+    private void validateCsvHeaders(String[] headers) {
+        if (headers.length < 3) {
+            throw new BadRequestException("CSV must have: name, matricol, course1, course2...");
+        }
+    }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+    private void validateCourses(Map<String, CourseBase> courseMap, List<String> courseNames) {
+        List<String> missingCourses = courseNames.stream()
+                .filter(cn -> !courseMap.containsKey(cn.toLowerCase()))
+                .toList();
 
-            String headerLine = br.readLine();
-            if (headerLine == null) throw new BadRequestException("CSV header missing");
+        if (!missingCourses.isEmpty()) {
+            throw new NotFoundException("Courses not found: " + String.join(", ", missingCourses));
+        }
+    }
 
-            String[] headers = splitCsvLine(headerLine);
-            if (headers.length < 3) throw new BadRequestException("CSV must have: name, matricol, course1, course2...");
+    private UploadStatistics processCsvRows(CsvData csvData, Map<String, CourseBase> courseMap,
+                                            boolean overwriteIfExists) {
+        UploadStatistics stats = new UploadStatistics();
 
-            List<String> courseNames = new ArrayList<>();
-            for (int i = 2; i < headers.length; i++) {
-                courseNames.add(headers[i].trim());
-            }
+        for (CsvRow row : csvData.getRows()) { // EXTRACT CLASS for CsvRow
+            processRow(row, courseMap, overwriteIfExists, stats);
+        }
 
-            // Preload all courses
-            Map<String, CourseBase> courseMap = new HashMap<>();
-            for (String cn : courseNames) {
-                CourseBase c = findCourseByName(cn);
-                if (c == null) {
-                    errors.add("Course not found: " + cn);
-                } else {
-                    courseMap.put(cn.toLowerCase(), c);
-                }
-            }
+        return stats;
+    }
 
-            if (!errors.isEmpty()) {
-                throw new NotFoundException("Upload aborted: " + String.join("; ", errors));
-            }
+    private void processRow(CsvRow row, Map<String, CourseBase> courseMap,
+                            boolean overwriteIfExists, UploadStatistics stats) {
+        stats.incrementTotalRows();
 
-            String line;
-            while ((line = br.readLine()) != null) {
-                totalRows++;
+        if (row.getMatricol().isEmpty()) {
+            stats.incrementSkipped();
+            return;
+        }
 
-                String[] cols = splitCsvLine(line);
-                if (cols.length < 2) {
-                    skipped++;
-                    errors.add("Invalid row: " + (totalRows + 1));
-                    continue;
-                }
-
-                String studentName = cols[0].trim();
-                String matricol = cols[1].trim();
-
-                if (matricol.isEmpty()) {
-                    skipped++;
-                    continue;
-                }
-
-                Optional<Grade> existingOpt = gradeRepo.findByMatricol(matricol);
-                Grade grade;
-
-                if (existingOpt.isPresent()) {
-                    if (!overwriteIfExists) {
-                        skipped++;
-                        continue;
-                    }
-                    grade = existingOpt.get();
-                    grade.clearEntries();
-                    grade.setStudentName(studentName);
-                } else {
-                    grade = Grade.builder()
-                            .matricol(matricol)
-                            .studentName(studentName)
-                            .build();
-                }
-
-                // Parse grade values
-                for (int i = 2; i < headers.length; i++) {
-
-                    String courseName = courseNames.get(i - 2);
-                    String raw = (i < cols.length) ? cols[i].trim() : "";
-
-                    if (raw.isEmpty()) continue;
-
-                    double value;
-                    try {
-                        value = Double.parseDouble(raw.replace(",", "."));
-                    } catch (Exception e) {
-                        errors.add("Invalid grade '" + raw + "' for course " + courseName);
-                        continue;
-                    }
-
-                    CourseBase course = courseMap.get(courseName.toLowerCase());
-                    GradeEntry entry = new GradeEntry();
-                    entry.setCourse(course);
-                    entry.setGradeValue(value);
-
-                    grade.addEntry(entry);
-                }
-
-                gradeRepo.save(grade);
-                if (existingOpt.isPresent()) updated++; else inserted++;
-            }
-
+        try {
+            Grade grade = findOrCreateGrade(row, overwriteIfExists);
+            processGradeEntries(grade, row, courseMap);
+            saveGrade(grade, stats);
         } catch (Exception e) {
-            throw new BadRequestException("Error processing CSV: " + e.getMessage());
+            stats.addError("Row " + stats.getTotalRows() + ": " + e.getMessage());
+            stats.incrementSkipped();
         }
-
-        String summary = "Inserted=" + inserted + ", Updated=" + updated + ", Skipped=" + skipped;
-        return new GradeUploadResultDTO(totalRows, inserted, updated, skipped, summary);
     }
 
-    private CourseBase findCourseByName(String name) {
-        return optionalRepo.findByNameIgnoreCase(name)
-                .map(c -> (CourseBase) c)
-                .orElseGet(() -> mandatoryRepo.findByNameIgnoreCase(name)
-                        .map(c -> (CourseBase) c)
-                        .orElse(null));
+    private Grade findOrCreateGrade(CsvRow row, boolean overwriteIfExists) {
+        return gradeRepo.findByMatricol(row.getMatricol())
+                .map(existing -> handleExistingGrade(existing, row, overwriteIfExists))
+                .orElse(createNewGrade(row));
     }
 
-    private String[] splitCsvLine(String line) {
-        List<String> tokens = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        boolean inQuotes = false;
+    private Grade handleExistingGrade(Grade existing, CsvRow row, boolean overwriteIfExists) {
+        if (!overwriteIfExists) {
+            throw new SkipRowException("Grade already exists and overwrite is false");
+        }
+        existing.clearEntries();
+        existing.setStudentName(row.getStudentName());
+        return existing;
+    }
 
-        for (char c : line.toCharArray()) {
-            if (c == '"') { inQuotes = !inQuotes; continue; }
-            if (c == ',' && !inQuotes) {
-                tokens.add(sb.toString());
-                sb.setLength(0);
-            } else {
-                sb.append(c);
+    private Grade createNewGrade(CsvRow row) {
+        return Grade.builder()
+                .matricol(row.getMatricol())
+                .studentName(row.getStudentName())
+                .build();
+    }
+
+    private void processGradeEntries(Grade grade, CsvRow row, Map<String, CourseBase> courseMap) {
+        for (GradeEntryData entryData : row.getGradeEntries()) { // EXTRACT CLASS
+            CourseBase course = courseMap.get(entryData.getCourseName().toLowerCase());
+            if (course != null && entryData.hasGradeValue()) {
+                GradeEntry entry = createGradeEntry(course, entryData.getGradeValue());
+                grade.addEntry(entry);
             }
         }
-        tokens.add(sb.toString());
-        return tokens.toArray(new String[0]);
+    }
+
+    private GradeEntry createGradeEntry(CourseBase course, double gradeValue) {
+        GradeEntry entry = new GradeEntry();
+        entry.setCourse(course);
+        entry.setGradeValue(gradeValue);
+        return entry;
+    }
+
+    private void saveGrade(Grade grade, UploadStatistics stats) {
+        gradeRepo.save(grade);
+        if (grade.getId() == null) {
+            stats.incrementInserted();
+        } else {
+            stats.incrementUpdated();
+        }
+    }
+
+    private GradeUploadResultDTO buildUploadResult(UploadStatistics stats) {
+        String summary = String.format("Inserted=%d, Updated=%d, Skipped=%d",
+                stats.getInserted(), stats.getUpdated(), stats.getSkipped());
+        return new GradeUploadResultDTO(
+                stats.getTotalRows(),
+                stats.getInserted(),
+                stats.getUpdated(),
+                stats.getSkipped(),
+                summary);
     }
 }

@@ -1,9 +1,7 @@
 package ro.uaic.ossp.dtos;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ro.uaic.ossp.models.enums.AllocationStrategy;
@@ -11,13 +9,19 @@ import ro.uaic.ossp.models.enums.AllocationStrategy;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class AllocationRequestDTO {
-    @NotEmpty(message = "Preferences list cannot be empty")
-    @Valid
     private List<PreferenceDTO> preferences;
-
-    @NotNull(message = "Allocation strategy cannot be null")
     private AllocationStrategy allocationStrategy;
+
+    private Boolean runDemo;  // true = demo, false = realest allocation
+    private DemoType demoType;
+    private Integer demoStudentCount;
+
+    public enum DemoType {
+        QUICK,
+        INTEGRATED
+    }
 }

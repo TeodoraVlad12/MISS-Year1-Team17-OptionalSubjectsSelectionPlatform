@@ -1,6 +1,7 @@
 package ro.uaic.ossp.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.uaic.ossp.dtos.OptionalCourseRequirementDTO;
@@ -15,101 +16,73 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OptionalCourseRequirementService {
-
     private final OptionalCourseRequirementRepository reqRepo;
-    private final MandatoryCourseRepository mandatoryRepo;
-    private final OptionalCourseRepository optionalRepo;
+    private final CourseValidationService validationService; // NEW: Extract validation
+    private final RequirementDtoMapper dtoMapper; // NEW: Extract DTO mapping
 
-    @Transactional(readOnly = true)
     public List<OptionalCourseRequirementResponseDTO> getRequirements(Long optionalId) {
         return reqRepo.findByOptionalCourseId(optionalId)
                 .stream()
-                .map(r -> OptionalCourseRequirementResponseDTO.builder()
-                        .id(r.getId())
-                        .mandatoryId(r.getMandatoryCourse().getId())
-                        .mandatoryName(r.getMandatoryCourse().getName())
-                        .percentage(r.getPercentage())
-                        .build()
-                )
+                .map(dtoMapper::toResponseDto) // EXTRACT METHOD
                 .toList();
     }
 
     @Transactional
-    public OptionalCourseRequirementResponseDTO createRequirement(Long optionalId, OptionalCourseRequirementDTO dto) {
+    public OptionalCourseRequirementResponseDTO createRequirement(Long optionalId,
+                                                                  OptionalCourseRequirementDTO dto) {
+        validationService.validateRequirementDto(dto); // EXTRACT METHOD
 
-        OptionalCourse optional = optionalRepo.findById(optionalId)
-                .orElseThrow(() -> new NotFoundException("Optional course not found"));
+        OptionalCourse optional = validationService.findOptionalCourseOrThrow(optionalId);
+        MandatoryCourse mandatory = validationService.findMandatoryCourseOrThrow(dto.getMandatoryCourseId());
 
-        MandatoryCourse mandatory = mandatoryRepo.findById(dto.getMandatoryCourseId())
-                .orElseThrow(() -> new NotFoundException("Mandatory course not found"));
+        validateNoExistingRequirement(optionalId, dto.getMandatoryCourseId());
 
-        // Note: Duplicate validation is handled by the frontend since we use delete-then-create pattern
-
-        if (dto.getPercentage() < 0 || dto.getPercentage() > 100) {
-            throw new BadRequestException("Percentage must be between 0 and 100");
-        }
-
-        // Note: Total percentage validation is handled by the frontend since we use delete-then-create pattern
-
-        OptionalCourseRequirement req = OptionalCourseRequirement.builder()
-                .mandatoryCourse(mandatory)
-                .optionalCourse(optional)
-                .percentage(dto.getPercentage())
-                .build();
-
+        OptionalCourseRequirement req = buildRequirement(optional, mandatory, (int) dto.getPercentage());
         reqRepo.save(req);
 
-        return OptionalCourseRequirementResponseDTO.builder()
-                .id(req.getId())
-                .mandatoryId(mandatory.getId())
-                .mandatoryName(mandatory.getName())
-                .percentage(req.getPercentage())
-                .build();
+        return dtoMapper.toResponseDto(req);
     }
 
     @Transactional
-    public OptionalCourseRequirementResponseDTO updateRequirement(Long id, OptionalCourseRequirementDTO dto) {
-        OptionalCourseRequirement req = reqRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Requirement not found"));
+    public OptionalCourseRequirementResponseDTO updateRequirement(Long id,
+                                                                  OptionalCourseRequirementDTO dto) {
+        validationService.validateRequirementDto(dto);
 
-        MandatoryCourse mandatory = mandatoryRepo.findById(dto.getMandatoryCourseId())
-                .orElseThrow(() -> new NotFoundException("Mandatory course not found"));
+        OptionalCourseRequirement req = findRequirementOrThrow(id);
+        MandatoryCourse mandatory = validationService.findMandatoryCourseOrThrow(dto.getMandatoryCourseId());
 
-        if (dto.getPercentage() < 0 || dto.getPercentage() > 100) {
-            throw new BadRequestException("Percentage must be between 0 and 100");
-        }
-
-        // Check if the new mandatory course is already assigned to this optional course (excluding current requirement)
-        if (!req.getMandatoryCourse().getId().equals(dto.getMandatoryCourseId()) && 
-            reqRepo.existsByOptionalCourseIdAndMandatoryCourseId(req.getOptionalCourse().getId(), dto.getMandatoryCourseId())) {
-            throw new BadRequestException("This mandatory course is already assigned to this optional course");
-        }
-
-        // Validate that total percentages don't exceed 100 (excluding current requirement)
-        double currentTotal = reqRepo.findByOptionalCourseId(req.getOptionalCourse().getId())
-                .stream()
-                .filter(r -> !r.getId().equals(id)) // Exclude current requirement from total
-                .mapToDouble(OptionalCourseRequirement::getPercentage)
-                .sum();
-                
-        if (currentTotal + dto.getPercentage() > 100) {
-            throw new BadRequestException(
-                String.format("Total percentage cannot exceed 100%%. Current total (excluding this requirement): %.1f%%, " +
-                            "updating to %.1f%% would result in %.1f%%", 
-                            currentTotal, dto.getPercentage(), currentTotal + dto.getPercentage()));
-        }
-
-        req.setMandatoryCourse(mandatory);
-        req.setPercentage(dto.getPercentage());
-
+        updateRequirementData(req, mandatory, (int) dto.getPercentage());
         reqRepo.save(req);
 
-        return OptionalCourseRequirementResponseDTO.builder()
-                .id(req.getId())
-                .mandatoryId(mandatory.getId())
-                .mandatoryName(mandatory.getName())
-                .percentage(req.getPercentage())
+        return dtoMapper.toResponseDto(req);
+    }
+
+    private void validateNoExistingRequirement(Long optionalId, Long mandatoryId) {
+        if (reqRepo.existsByOptionalCourseIdAndMandatoryCourseId(optionalId, mandatoryId)) {
+            throw new BadRequestException("This mandatory course already has a percentage assigned.");
+        }
+    }
+
+    private OptionalCourseRequirement buildRequirement(OptionalCourse optional,
+                                                       MandatoryCourse mandatory,
+                                                       Integer percentage) {
+        return OptionalCourseRequirement.builder()
+                .mandatoryCourse(mandatory)
+                .optionalCourse(optional)
+                .percentage(percentage)
                 .build();
+    }
+
+    private void updateRequirementData(OptionalCourseRequirement req,
+                                       MandatoryCourse mandatory,
+                                       Integer percentage) {
+        req.setMandatoryCourse(mandatory);
+        req.setPercentage(percentage);
+    }
+
+    private OptionalCourseRequirement findRequirementOrThrow(Long id) {
+        return reqRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Requirement not found"));
     }
 
     @Transactional
@@ -120,3 +93,41 @@ public class OptionalCourseRequirementService {
         reqRepo.deleteById(id);
     }
 }
+
+// NEW: Mapper class to handle DTO conversions
+@Component
+class RequirementDtoMapper {
+    public OptionalCourseRequirementResponseDTO toResponseDto(OptionalCourseRequirement req) {
+        return OptionalCourseRequirementResponseDTO.builder()
+                .id(req.getId())
+                .mandatoryId(req.getMandatoryCourse().getId())
+                .mandatoryName(req.getMandatoryCourse().getName())
+                .percentage(req.getPercentage())
+                .build();
+    }
+}
+
+// NEW: Validation service extracted
+@Component
+@RequiredArgsConstructor
+class CourseValidationService {
+    private final MandatoryCourseRepository mandatoryRepo;
+    private final OptionalCourseRepository optionalRepo;
+
+    public void validateRequirementDto(OptionalCourseRequirementDTO dto) {
+        if (dto.getPercentage() < 0 || dto.getPercentage() > 100) {
+            throw new BadRequestException("Percentage must be between 0 and 100");
+        }
+    }
+
+    public OptionalCourse findOptionalCourseOrThrow(Long id) {
+        return optionalRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Optional course not found"));
+    }
+
+    public MandatoryCourse findMandatoryCourseOrThrow(Long id) {
+        return mandatoryRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Mandatory course not found"));
+    }
+}
+
